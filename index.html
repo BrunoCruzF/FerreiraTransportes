@@ -3,48 +3,50 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sistema Simultâneo – Projeto Ferreira</title>
+  <title>Controle de Advertências – Login</title>
   <link rel="stylesheet" href="./styles.css" />
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script defer src="./script.js"></script>
+  <script defer src="./login.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <h1>Sistema Coletas / Tarefas</h1>
-    <div class="user-box">
-      <span id="user-email">Deslogado</span>
-      <button id="btn-logout" class="secondary hidden">Sair</button>
+    <div class="brand">
+      <span class="logo">⚑</span>
+      <h1>Controle de Advertências</h1>
     </div>
   </header>
 
   <main class="container">
-    <!-- Login -->
-    <section id="auth-card" class="card">
-      <h2>Entrar</h2>
-      <label>Email
-        <input type="email" id="email" placeholder="voce@exemplo.com" />
+    <!-- Card de Login -->
+    <section id="login-card" class="card card-auth">
+      <h2>Acesse sua conta</h2>
+      <label>E-mail
+        <input type="email" id="email" placeholder="voce@empresa.com.br" autocomplete="username" />
       </label>
       <label>Senha
-        <input type="password" id="password" placeholder="********" />
+        <input type="password" id="password" placeholder="********" autocomplete="current-password" />
       </label>
       <div class="row">
-        <button id="btn-login">Login</button>
+        <button id="btn-login">Entrar</button>
         <button id="btn-signup" class="secondary">Criar conta</button>
       </div>
-      <p class="hint">Dica: use um e‑mail real para recuperar senha, se precisar.</p>
+
+      <div class="row extras">
+        <button id="btn-recover" class="linklike">Esqueci minha senha</button>
+      </div>
+
+      <p id="auth-msg" class="muted"></p>
     </section>
 
-    <!-- App -->
-    <section id="app-card" class="card hidden">
-      <h2>Mural Compartilhado</h2>
-
-      <form id="form-tarefa" class="row">
-        <input id="input-titulo" placeholder="Descreva a tarefa..." />
-        <button type="submit">Adicionar</button>
-      </form>
-
-      <ul id="lista" class="list"></ul>
-      <p id="empty" class="muted">Nenhum item ainda. Comece adicionando acima.</p>
+    <!-- Estado logado (temporário até criarmos o painel) -->
+    <section id="logged-card" class="card hidden">
+      <h2>Bem-vindo!</h2>
+      <p id="user-email" class="muted"></p>
+      <div class="row">
+        <button id="btn-go" class="primary" disabled>Entrar no Sistema</button>
+        <button id="btn-logout" class="secondary">Sair</button>
+      </div>
+      <p class="hint">Assim que finalizarmos o painel, o botão “Entrar no Sistema” levará para a tela principal.</p>
     </section>
   </main>
 
