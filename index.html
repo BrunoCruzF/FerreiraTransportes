@@ -8,12 +8,10 @@
   <style>
     * { box-sizing: border-box; }
     :root{
-      /* tema escuro (default) */
       --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --border:#1f2a44;
       --txt:#e5e7eb; --muted:#9aa4b2; --accent:#22c55e; --accentText:#06270e;
       --btnText:#e5e7eb; --tableHead:#0a1120;
     }
-    /* tema claro */
     body[data-theme="light"]{
       --bg:#f5f7fb; --bg2:#eef2f9; --card:#ffffff; --border:#e5e7eb;
       --txt:#0f172a; --muted:#596173; --accent:#2563eb; --accentText:#ffffff;
@@ -34,7 +32,6 @@
       display:flex; flex-direction:column; transition: background .25s ease, color .25s ease;
     }
 
-    /* ====== HEADER ====== */
     .topbar{
       position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
       gap:14px; padding:10px 16px; background:rgba(11,18,32,0.08); backdrop-filter:blur(8px);
@@ -51,7 +48,6 @@
     .userbox{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:14px}
     .icon-btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--btnText); cursor:pointer; font-weight:600}
 
-    /* ====== LAYOUT ====== */
     .container{max-width:1100px; width:100%; margin:24px auto; padding:0 16px; flex:1}
     .card{
       background:linear-gradient(180deg,var(--card),color-mix(in oklab, var(--card) 88%, black 12%));
@@ -84,18 +80,10 @@
     .footer{ text-align:center; padding:14px; color:var(--muted); font-size:12px; }
     .container-sm{max-width:420px; width:100%; margin:40px auto; padding:0 16px}
 
-    /* CONTRASTE DO SELECT (melhor visibilidade) */
-    select, select option {
-      color: #e5e7eb;
-      background-color: #0a1120;
-    }
-    body[data-theme="light"] select,
-    body[data-theme="light"] select option{
-      color:#0f172a; background-color:#ffffff;
-    }
+    select, select option { color:#e5e7eb; background-color:#0a1120; }
+    body[data-theme="light"] select, body[data-theme="light"] select option{ color:#0f172a; background:#fff; }
     select:focus{ outline:2px solid color-mix(in oklab, var(--accent) 60%, #ffffff 40%); outline-offset:2px }
 
-    /* responsivo */
     @media (max-width: 820px){
       .grid-4{grid-template-columns:1fr 1fr}
       .grid-3{grid-template-columns:1fr 1fr}
@@ -147,68 +135,71 @@
       <button data-tab="colab">Colaboradores</button>
     </div>
 
-    <!-- TAB: ADVERTÊNCIAS -->
-    <section id="tab-adv" class="card">
-      <h2 style="margin-top:0">Cadastrar Advertência</h2>
-      <form id="form-adv" class="grid-4">
-        <label>Colaborador
-          <select id="f_colaborador_id" required></select>
-        </label>
-        <label>CPF
-          <input id="f_cpf" readonly placeholder="—" />
-        </label>
-        <label>CTPS
-          <input id="f_ctps" readonly placeholder="—" />
-        </label>
-        <label>Série
-          <input id="f_serie" readonly placeholder="—" />
-        </label>
+    <!-- ===== CONTÊINER DA ABA ADVERTÊNCIAS (form + registros) ===== -->
+    <div id="tab-adv">
+      <section class="card">
+        <h2 style="margin-top:0">Cadastrar Advertência</h2>
+        <form id="form-adv" class="grid-4">
+          <label>Colaborador
+            <select id="f_colaborador_id" required></select>
+          </label>
+          <label>CPF
+            <input id="f_cpf" readonly placeholder="—" />
+          </label>
+          <label>CTPS
+            <input id="f_ctps" readonly placeholder="—" />
+          </label>
+          <label>Série
+            <input id="f_serie" readonly placeholder="—" />
+          </label>
 
-        <label>Data da ocorrência
-          <input type="date" id="f_data_ocorrencia" required />
-        </label>
-        <label>Data da aplicação
-          <input type="date" id="f_data_aplicacao" required />
-        </label>
-        <label>Tipo de advertência
-          <select id="f_tipo" required>
-            <option>Verbal</option>
-            <option>Falta não justificada</option>
-            <option>Atraso</option>
-          </select>
-        </label>
-        <div></div>
+          <label>Data da ocorrência
+            <input type="date" id="f_data_ocorrencia" required />
+          </label>
+          <label>Data da aplicação
+            <input type="date" id="f_data_aplicacao" required />
+          </label>
+          <label>Tipo de advertência
+            <select id="f_tipo" required>
+              <option>Verbal</option>
+              <option>Falta não justificada</option>
+              <option>Atraso</option>
+            </select>
+          </label>
+          <div></div>
 
-        <label style="grid-column:1/-1">Anexo (PNG ou PDF)
-          <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" />
-        </label>
-        <div class="row" style="grid-column:1/-1">
-          <button class="primary" type="submit">Salvar</button>
-        </div>
-      </form>
-    </section>
+          <label style="grid-column:1/-1">Anexo (PNG ou PDF)
+            <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" />
+          </label>
+          <div class="row" style="grid-column:1/-1">
+            <button class="primary" type="submit">Salvar</button>
+          </div>
+        </form>
+      </section>
 
-    <section class="card" style="margin-top:14px">
-      <h2 style="margin-top:0">Registros</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Colaborador (download)</th>
-            <th>CPF</th>
-            <th>CTPS</th>
-            <th>Série</th>
-            <th>Ocorrência</th>
-            <th>Aplicação</th>
-            <th>Tipo</th>
-            <th style="width:1%"></th>
-          </tr>
-        </thead>
-        <tbody id="tbl-reg"></tbody>
-      </table>
-      <p id="empty" class="muted">Nenhum registro ainda.</p>
-    </section>
+      <section class="card" style="margin-top:14px">
+        <h2 style="margin-top:0">Registros</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Colaborador (download)</th>
+              <th>CPF</th>
+              <th>CTPS</th>
+              <th>Série</th>
+              <th>Ocorrência</th>
+              <th>Aplicação</th>
+              <th>Tipo</th>
+              <th style="width:1%"></th>
+            </tr>
+          </thead>
+          <tbody id="tbl-reg"></tbody>
+        </table>
+        <p id="empty" class="muted">Nenhum registro ainda.</p>
+      </section>
+    </div>
+    <!-- ===== FIM ABA ADVERTÊNCIAS ===== -->
 
-    <!-- TAB: COLABORADORES -->
+    <!-- ABA COLABORADORES (somente colaboradores) -->
     <section id="tab-colab" class="card hidden" style="margin-top:14px">
       <h2 style="margin-top:0">Colaboradores</h2>
       <form id="form-colab" class="grid-3" style="margin-top:8px">
@@ -241,18 +232,14 @@
 
   <footer class="footer">Desenvolvido por Bruno Ferreira da Cruz</footer>
 
-  <!-- Supabase UMD -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
   <script>
-    // ======= CONFIG =======
-    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co"; // TROQUE
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";            // TROQUE
+    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
     const BUCKET = 'adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ======= ELEMENTOS =======
     const E = {
-      // auth
       viewAuth: document.getElementById('view-auth'),
       viewApp: document.getElementById('view-app'),
       userEmail: document.getElementById('user-email'),
@@ -263,14 +250,11 @@
       btnSignup: document.getElementById('btn-signup'),
       btnRecover: document.getElementById('btn-recover'),
       msg: document.getElementById('auth-msg'),
-      // header
       homeLink: document.getElementById('home-link'),
       btnTheme: document.getElementById('btn-theme'),
-      // tabs
       tabBtns: document.querySelectorAll('.tabs button'),
-      tabAdv: document.getElementById('tab-adv'),
+      tabAdv: document.getElementById('tab-adv'),     // << contêiner com tudo da aba
       tabColab: document.getElementById('tab-colab'),
-      // adv form/list
       formAdv: document.getElementById('form-adv'),
       f_colab_id: document.getElementById('f_colaborador_id'),
       f_cpf: document.getElementById('f_cpf'),
@@ -282,7 +266,6 @@
       f_arquivo: document.getElementById('f_arquivo'),
       tblReg: document.getElementById('tbl-reg'),
       empty: document.getElementById('empty'),
-      // colab form/list
       formColab: document.getElementById('form-colab'),
       c_nome: document.getElementById('c_nome'),
       c_cpf: document.getElementById('c_cpf'),
@@ -292,12 +275,12 @@
       colabEmpty: document.getElementById('colab-empty'),
     };
 
-    // ======= TEMA =======
-    const THEME_KEY = 'ft_theme';
-    function applyTheme(theme){
-      if(theme) document.body.setAttribute('data-theme', theme);
+    // Tema
+    const THEME_KEY='ft_theme';
+    function applyTheme(t){
+      if(t) document.body.setAttribute('data-theme', t);
       else document.body.removeAttribute('data-theme');
-      const isLight = (document.body.getAttribute('data-theme') === 'light') ||
+      const isLight = (document.body.getAttribute('data-theme')==='light') ||
         (!document.body.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: light)').matches);
       E.btnTheme.textContent = isLight ? '🌞 Tema' : '🌙 Tema';
       E.btnTheme.title = isLight ? 'Trocar para escuro' : 'Trocar para claro';
@@ -312,18 +295,18 @@
     applyTheme(localStorage.getItem(THEME_KEY));
     E.btnTheme.addEventListener('click', toggleTheme);
 
-    // ======= TABS =======
+    // Tabs
     function setTab(name){
-      E.tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-      E.tabAdv.classList.toggle('hidden', name !== 'adv');
-      E.tabColab.classList.toggle('hidden', name !== 'colab');
+      E.tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab===name));
+      E.tabAdv.classList.toggle('hidden', name!=='adv');
+      E.tabColab.classList.toggle('hidden', name!=='colab');
     }
-    E.tabBtns.forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
-    E.homeLink.addEventListener('click', (ev)=>{ ev.preventDefault(); setTab('adv'); window.scrollTo({top:0,behavior:'smooth'}); });
+    E.tabBtns.forEach(b => b.addEventListener('click', ()=>setTab(b.dataset.tab)));
+    E.homeLink.addEventListener('click', (e)=>{e.preventDefault(); setTab('adv'); window.scrollTo({top:0,behavior:'smooth'});});
 
-    // ======= AUTH =======
-    function setErr(t){ E.msg.textContent = t; E.msg.style.color = '#f87171'; }
-    function setOk(t){ E.msg.textContent = t; E.msg.style.color = '#34d399'; }
+    // Auth
+    function setErr(t){ E.msg.textContent=t; E.msg.style.color='#f87171'; }
+    function setOk(t){ E.msg.textContent=t; E.msg.style.color='#34d399'; }
     function setLogged(session){
       const logged = !!session;
       E.viewAuth.classList.toggle('hidden', logged);
@@ -331,42 +314,39 @@
       E.btnLogout.classList.toggle('hidden', !logged);
       E.userEmail.textContent = logged ? session.user.email : 'Deslogado';
     }
-
     E.btnLogin.addEventListener('click', async ()=>{
-      const email = E.email.value.trim(), password = E.password.value;
+      const email=E.email.value.trim(), password=E.password.value;
       if(!email||!password) return setErr('Preencha e-mail e senha.');
       const { error } = await supabaseClient.auth.signInWithPassword({ email,password });
       if(error) return setErr(error.message);
     });
     E.btnSignup.addEventListener('click', async ()=>{
-      const email = E.email.value.trim(), password = E.password.value;
+      const email=E.email.value.trim(), password=E.password.value;
       if(!email||!password) return setErr('Defina um e-mail e uma senha.');
       const { error } = await supabaseClient.auth.signUp({ email,password });
       if(error) return setErr(error.message);
       setOk('Conta criada! (confirmação desativada).');
     });
     E.btnRecover.addEventListener('click', async ()=>{
-      const email = E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
+      const email=E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
       if(error) return setErr(error.message);
       setOk('Se existir, enviaremos um link de redefinição.');
     });
-    document.getElementById('btn-logout').addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); });
+    E.btnLogout.addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); });
 
-    // ======= DATA: COLABORADORES =======
+    // Data: Colaboradores
     async function loadColabs(){
       const { data, error } = await supabaseClient.from('colaboradores').select('*').order('created_at',{ascending:false});
       if(error){ console.error(error); return; }
-      renderColabs(data||[]);
-      fillColabSelect(data||[]);
+      renderColabs(data||[]); fillColabSelect(data||[]);
     }
     function renderColabs(items){
-      E.tblColab.innerHTML = '';
-      if(!items.length){ E.colabEmpty.classList.remove('hidden'); return; }
+      E.tblColab.innerHTML=''; if(!items.length){ E.colabEmpty.classList.remove('hidden'); return; }
       E.colabEmpty.classList.add('hidden');
       for(const c of items){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
           <td>${escapeHtml(c.nome)}</td>
           <td>${escapeHtml(c.cpf||'')}</td>
           <td>${escapeHtml(c.ctps||'')}</td>
@@ -377,142 +357,92 @@
       }
     }
     function fillColabSelect(items){
-      E.f_colab_id.innerHTML = '';
+      E.f_colab_id.innerHTML='';
       if(!items.length){
-        E.f_colab_id.innerHTML = '<option value="">— Cadastre um colaborador —</option>';
-        E.f_cpf.value = E.f_ctps.value = E.f_serie.value = '';
+        E.f_colab_id.innerHTML='<option value="">— Cadastre um colaborador —</option>';
+        E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
         return;
       }
       for(const c of items){
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = c.nome;
-        opt.dataset.cpf = c.cpf||'';
-        opt.dataset.ctps = c.ctps||'';
-        opt.dataset.serie = c.serie||'';
+        const opt=document.createElement('option');
+        opt.value=c.id; opt.textContent=c.nome;
+        opt.dataset.cpf=c.cpf||''; opt.dataset.ctps=c.ctps||''; opt.dataset.serie=c.serie||'';
         E.f_colab_id.appendChild(opt);
       }
       syncColabInfo();
     }
     function syncColabInfo(){
-      const opt = E.f_colab_id.selectedOptions[0];
-      if(!opt){ E.f_cpf.value = E.f_ctps.value = E.f_serie.value=''; return; }
-      E.f_cpf.value = opt.dataset.cpf || '';
-      E.f_ctps.value = opt.dataset.ctps || '';
-      E.f_serie.value = opt.dataset.serie || '';
+      const opt=E.f_colab_id.selectedOptions[0];
+      if(!opt){ E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; return; }
+      E.f_cpf.value=opt.dataset.cpf||''; E.f_ctps.value=opt.dataset.ctps||''; E.f_serie.value=opt.dataset.serie||'';
     }
     E.f_colab_id.addEventListener('change', syncColabInfo);
-
     async function delColab(id){
       if(!confirm('Excluir colaborador? (isso não apaga registros antigos)')) return;
       await supabaseClient.from('colaboradores').delete().eq('id', id);
     }
 
-    // ======= DATA: ADVERTÊNCIAS =======
+    // Data: Advertências
     async function loadAdv(){
-      const { data, error } = await supabaseClient
-        .from('adv_registros_view')
-        .select('*')
-        .order('data_ocorrencia',{ascending:false});
+      const { data, error } = await supabaseClient.from('adv_registros_view').select('*').order('data_ocorrencia',{ascending:false});
       if(error){ console.error(error); return; }
       renderAdv(data||[]);
     }
     function renderAdv(items){
-      E.tblReg.innerHTML = '';
-      if(!items.length){ E.empty.classList.remove('hidden'); return; }
+      E.tblReg.innerHTML=''; if(!items.length){ E.empty.classList.remove('hidden'); return; }
       E.empty.classList.add('hidden');
       for(const r of items){
-        const tr = document.createElement('tr');
-
-        const tdNome = document.createElement('td');
+        const tr=document.createElement('tr');
+        const tdNome=document.createElement('td');
         if(r.arquivo_path){
           const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
-          const a = document.createElement('a');
-          a.href = pub.publicUrl; a.target = '_blank'; a.rel = 'noopener';
-          a.textContent = r.colaborador_nome || r.colaborador || '—';
-          tdNome.appendChild(a);
-        } else {
-          tdNome.textContent = r.colaborador_nome || r.colaborador || '—';
-        }
-
-        const tdCpf = document.createElement('td');   tdCpf.textContent = r.colaborador_cpf || '—';
-        const tdCtps = document.createElement('td');  tdCtps.textContent = r.colaborador_ctps || '—';
-        const tdSerie = document.createElement('td'); tdSerie.textContent = r.colaborador_serie || '—';
-        const tdOc = document.createElement('td');    tdOc.textContent = r.data_ocorrencia ? new Date(r.data_ocorrencia).toLocaleDateString() : '—';
-        const tdAp = document.createElement('td');    tdAp.textContent = r.data_aplicacao ? new Date(r.data_aplicacao).toLocaleDateString() : '—';
-        const tdTp = document.createElement('td');    tdTp.textContent = r.tipo || '—';
-
-        const tdDel = document.createElement('td');
-        const bt = document.createElement('button'); bt.className = 'danger'; bt.textContent = 'Excluir';
-        bt.addEventListener('click', ()=>delAdv(r.id, r.arquivo_path));
-        tdDel.appendChild(bt);
-
-        tr.appendChild(tdNome); tr.appendChild(tdCpf); tr.appendChild(tdCtps); tr.appendChild(tdSerie);
-        tr.appendChild(tdOc); tr.appendChild(tdAp); tr.appendChild(tdTp); tr.appendChild(tdDel);
-        E.tblReg.appendChild(tr);
+          const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener';
+          a.textContent=r.colaborador_nome||r.colaborador||'—'; tdNome.appendChild(a);
+        } else { tdNome.textContent=r.colaborador_nome||r.colaborador||'—'; }
+        const tdCpf=document.createElement('td'); tdCpf.textContent=r.colaborador_cpf||'—';
+        const tdCtps=document.createElement('td'); tdCtps.textContent=r.colaborador_ctps||'—';
+        const tdSerie=document.createElement('td'); tdSerie.textContent=r.colaborador_serie||'—';
+        const tdOc=document.createElement('td'); tdOc.textContent=r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
+        const tdAp=document.createElement('td'); tdAp.textContent=r.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
+        const tdTp=document.createElement('td'); tdTp.textContent=r.tipo||'—';
+        const tdDel=document.createElement('td');
+        const bt=document.createElement('button'); bt.className='danger'; bt.textContent='Excluir';
+        bt.addEventListener('click', ()=>delAdv(r.id, r.arquivo_path)); tdDel.appendChild(bt);
+        tr.append(tdNome,tdCpf,tdCtps,tdSerie,tdOc,tdAp,tdTp,tdDel); E.tblReg.appendChild(tr);
       }
     }
 
-    // ======= SUBMITS =======
-    // Colaborador: agora atualiza a lista e seleciona o novo SEM F5
+    // Submits
     E.formColab.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      const payload = {
-        nome: E.c_nome.value.trim(),
-        cpf:  E.c_cpf.value.trim() || null,
-        ctps: E.c_ctps.value.trim() || null,
-        serie:E.c_serie.value.trim() || null,
-      };
+      const payload={ nome:E.c_nome.value.trim(), cpf:E.c_cpf.value.trim()||null, ctps:E.c_ctps.value.trim()||null, serie:E.c_serie.value.trim()||null };
       if(!payload.nome) return;
-
-      const { data, error } = await supabaseClient
-        .from('colaboradores')
-        .insert(payload)
-        .select()
-        .single();
-
-      if(error){ alert('Erro ao salvar colaborador: ' + error.message); return; }
-
+      const { data, error } = await supabaseClient.from('colaboradores').insert(payload).select().single();
+      if(error){ alert('Erro ao salvar colaborador: '+error.message); return; }
       e.target.reset();
-
-      await loadColabs();                 // atualiza a lista
-      if (data?.id) {
-        E.f_colab_id.value = data.id;     // já seleciona o novo
-        syncColabInfo();                  // preenche CPF/CTPS/Série
-      }
+      await loadColabs();
+      if(data?.id){ E.f_colab_id.value=data.id; syncColabInfo(); }
     });
 
     E.formAdv.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      const colaborador_id = E.f_colab_id.value || null;
-      if(!colaborador_id) return alert('Selecione um colaborador.');
-
-      const nomeSnapshot = E.f_colab_id.selectedOptions[0]?.textContent || null;
-      const payload = {
-        colaborador_id,
-        colaborador: nomeSnapshot,
-        data_ocorrencia: E.f_data_ocorrencia.value,
-        data_aplicacao:  E.f_data_aplicacao.value,
-        tipo:            E.f_tipo.value,
-        arquivo_path:    null,
-      };
-
-      const file = E.f_arquivo.files[0];
-      if (file){
-        const ext = (file.name.split('.').pop() || '').toLowerCase();
+      const colaborador_id=E.f_colab_id.value||null; if(!colaborador_id) return alert('Selecione um colaborador.');
+      const nomeSnapshot=E.f_colab_id.selectedOptions[0]?.textContent||null;
+      const payload={ colaborador_id, colaborador:nomeSnapshot, data_ocorrencia:E.f_data_ocorrencia.value, data_aplicacao:E.f_data_aplicacao.value, tipo:E.f_tipo.value, arquivo_path:null };
+      const file=E.f_arquivo.files[0];
+      if(file){
+        const ext=(file.name.split('.').pop()||'').toLowerCase();
         if(!['png','pdf'].includes(ext)) return alert('Envie um PNG ou PDF.');
-        const path = `${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
-        const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert:false });
+        const path=`${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
+        const { error:upErr } = await supabaseClient.storage.from(BUCKET).upload(path, file, { cacheControl:'3600', upsert:false });
         if(upErr){ alert('Falha no upload: '+upErr.message); return; }
-        payload.arquivo_path = path;
+        payload.arquivo_path=path;
       }
-
       const { error } = await supabaseClient.from('adv_registros').insert(payload);
       if(error){ alert('Erro ao salvar: '+error.message); return; }
       e.target.reset();
-      const today = new Date().toISOString().slice(0,10);
-      E.f_data_ocorrencia.value = today; E.f_data_aplicacao.value = today;
-      syncColabInfo();
+      const today=new Date().toISOString().slice(0,10);
+      E.f_data_ocorrencia.value=today; E.f_data_aplicacao.value=today; syncColabInfo();
     });
 
     async function delAdv(id, arquivo_path){
@@ -521,31 +451,17 @@
       if(arquivo_path){ await supabaseClient.storage.from(BUCKET).remove([arquivo_path]); }
     }
 
-    // ======= UTILS =======
     function escapeHtml(s){return (s||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
-    // ======= INIT =======
     (async function init(){
-      const today = new Date().toISOString().slice(0,10);
-      E.f_data_ocorrencia.value = today; E.f_data_aplicacao.value = today;
-
-      const { data: { session } } = await supabaseClient.auth.getSession();
+      const today=new Date().toISOString().slice(0,10);
+      E.f_data_ocorrencia.value=today; E.f_data_aplicacao.value=today;
+      const { data:{ session } } = await supabaseClient.auth.getSession();
       setLogged(session);
-      if(session){
-        setTab('adv');
-        await loadColabs();
-        await loadAdv();
-      }
-      supabaseClient.auth.onAuthStateChange((_e, s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); } });
-
-      // realtime
-      supabaseClient.channel('colabs-rt')
-        .on('postgres_changes', { event:'*', schema:'public', table:'colaboradores' }, loadColabs)
-        .subscribe();
-
-      supabaseClient.channel('adv-rt')
-        .on('postgres_changes', { event:'*', schema:'public', table:'adv_registros' }, loadAdv)
-        .subscribe();
+      if(session){ setTab('adv'); await loadColabs(); await loadAdv(); }
+      supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); } });
+      supabaseClient.channel('colabs-rt').on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},loadColabs).subscribe();
+      supabaseClient.channel('adv-rt').on('postgres_changes',{event:'*',schema:'public',table:'adv_registros'},loadAdv).subscribe();
     })();
   </script>
 </body>
