@@ -11,8 +11,7 @@
       /* tema escuro (default) */
       --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --border:#1f2a44;
       --txt:#e5e7eb; --muted:#9aa4b2; --accent:#22c55e; --accentText:#06270e;
-      --btnText:#e5e7eb;
-      --tableHead:#0a1120;
+      --btnText:#e5e7eb; --tableHead:#0a1120;
     }
     /* tema claro */
     body[data-theme="light"]{
@@ -20,9 +19,9 @@
       --txt:#0f172a; --muted:#596173; --accent:#2563eb; --accentText:#ffffff;
       --btnText:#0f172a; --tableHead:#f4f6fb;
     }
-    /* seguir preferência do SO na 1ª visita */
     @media (prefers-color-scheme: light){
-      body:not([data-theme]){ --bg:#f5f7fb; --bg2:#eef2f9; --card:#ffffff; --border:#e5e7eb;
+      body:not([data-theme]){
+        --bg:#f5f7fb; --bg2:#eef2f9; --card:#ffffff; --border:#e5e7eb;
         --txt:#0f172a; --muted:#596173; --accent:#2563eb; --accentText:#ffffff;
         --btnText:#0f172a; --tableHead:#f4f6fb;
       }
@@ -32,41 +31,31 @@
     body{
       margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;
       color:var(--txt); background:linear-gradient(180deg,var(--bg),var(--bg2));
-      display:flex; flex-direction:column;
-      transition: background .25s ease, color .25s ease;
+      display:flex; flex-direction:column; transition: background .25s ease, color .25s ease;
     }
 
     /* ====== HEADER ====== */
     .topbar{
-      position:sticky; top:0; z-index:10;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:14px;
-      padding:10px 16px; background:rgba(11,18,32,0.08);
-      backdrop-filter:blur(8px);
+      position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
+      gap:14px; padding:10px 16px; background:rgba(11,18,32,0.08); backdrop-filter:blur(8px);
       border-bottom:1px solid var(--border);
     }
     body[data-theme="light"] .topbar{ background:rgba(255,255,255,0.7); }
     .brand{display:flex; align-items:center; gap:10px}
     .brand a{display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit}
     .brand img.logo-img{
-      height: clamp(48px, 8vh, 100px);
-      width:auto; display:block; border-radius:10px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+      height: clamp(48px, 8vh, 80px);
+      width:auto; display:block; border-radius:10px; box-shadow: 0 6px 18px rgba(0,0,0,.15);
     }
     .brand h1{margin:0; font-size:18px; letter-spacing:.2px}
-
     .userbox{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:14px}
-    .icon-btn{
-      padding:8px 12px; border-radius:10px; border:1px solid var(--border);
-      background:transparent; color:var(--btnText); cursor:pointer; font-weight:600;
-    }
+    .icon-btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--btnText); cursor:pointer; font-weight:600}
 
     /* ====== LAYOUT ====== */
     .container{max-width:1100px; width:100%; margin:24px auto; padding:0 16px; flex:1}
     .card{
       background:linear-gradient(180deg,var(--card),color-mix(in oklab, var(--card) 88%, black 12%));
-      border:1px solid var(--border); border-radius:16px; padding:18px;
-      box-shadow:0 18px 40px rgba(0,0,0,.10);
+      border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 18px 40px rgba(0,0,0,.10);
     }
     .tabs{display:flex; gap:10px; margin-bottom:12px}
     .tabs button{padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:transparent; color:var(--txt); cursor:pointer; font-weight:700}
@@ -82,9 +71,7 @@
     input[readonly]{opacity:.85}
     input[type="file"]{ padding:8px; }
     input:focus,select:focus,textarea:focus{border-color:color-mix(in oklab, var(--accent) 40%, var(--border) 60%)}
-    button{
-      padding:12px 16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; font-weight:700;
-    }
+    button{padding:12px 16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; font-weight:700}
     .primary{ background:var(--accent); color:var(--accentText); border-color:transparent }
     .secondary{ background:transparent; color:var(--btnText); }
     .danger{ background:#ef4444; color:#fff; border-color:#7f1d1d }
@@ -96,6 +83,17 @@
     .hidden{display:none}
     .footer{ text-align:center; padding:14px; color:var(--muted); font-size:12px; }
     .container-sm{max-width:420px; width:100%; margin:40px auto; padding:0 16px}
+
+    /* CONTRASTE DO SELECT (melhor visibilidade) */
+    select, select option {
+      color: #e5e7eb;
+      background-color: #0a1120;
+    }
+    body[data-theme="light"] select,
+    body[data-theme="light"] select option{
+      color:#0f172a; background-color:#ffffff;
+    }
+    select:focus{ outline:2px solid color-mix(in oklab, var(--accent) 60%, #ffffff 40%); outline-offset:2px }
 
     /* responsivo */
     @media (max-width: 820px){
@@ -111,7 +109,6 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <!-- LOGO clicável: volta para a aba Advertências -->
       <a href="#" id="home-link" title="Ir para Advertências">
         <img src="./logo.png" alt="Ferreira Transportes & Logística" class="logo-img" />
         <h1>Controle de Advertências</h1>
@@ -295,13 +292,13 @@
       colabEmpty: document.getElementById('colab-empty'),
     };
 
-    // ======= TEMA (claro/escuro) =======
+    // ======= TEMA =======
     const THEME_KEY = 'ft_theme';
     function applyTheme(theme){
       if(theme) document.body.setAttribute('data-theme', theme);
-      else document.body.removeAttribute('data-theme'); // deixa o SO decidir
+      else document.body.removeAttribute('data-theme');
       const isLight = (document.body.getAttribute('data-theme') === 'light') ||
-                      (!document.body.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: light)').matches);
+        (!document.body.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: light)').matches);
       E.btnTheme.textContent = isLight ? '🌞 Tema' : '🌙 Tema';
       E.btnTheme.title = isLight ? 'Trocar para escuro' : 'Trocar para claro';
     }
@@ -312,7 +309,6 @@
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
     }
-    // carregar tema salvo
     applyTheme(localStorage.getItem(THEME_KEY));
     E.btnTheme.addEventListener('click', toggleTheme);
 
@@ -323,7 +319,6 @@
       E.tabColab.classList.toggle('hidden', name !== 'colab');
     }
     E.tabBtns.forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
-    // logo leva para Advertências
     E.homeLink.addEventListener('click', (ev)=>{ ev.preventDefault(); setTab('adv'); window.scrollTo({top:0,behavior:'smooth'}); });
 
     // ======= AUTH =======
@@ -458,6 +453,8 @@
       }
     }
 
+    // ======= SUBMITS =======
+    // Colaborador: agora atualiza a lista e seleciona o novo SEM F5
     E.formColab.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const payload = {
@@ -467,8 +464,22 @@
         serie:E.c_serie.value.trim() || null,
       };
       if(!payload.nome) return;
-      await supabaseClient.from('colaboradores').insert(payload);
+
+      const { data, error } = await supabaseClient
+        .from('colaboradores')
+        .insert(payload)
+        .select()
+        .single();
+
+      if(error){ alert('Erro ao salvar colaborador: ' + error.message); return; }
+
       e.target.reset();
+
+      await loadColabs();                 // atualiza a lista
+      if (data?.id) {
+        E.f_colab_id.value = data.id;     // já seleciona o novo
+        syncColabInfo();                  // preenche CPF/CTPS/Série
+      }
     });
 
     E.formAdv.addEventListener('submit', async (e)=>{
@@ -477,10 +488,9 @@
       if(!colaborador_id) return alert('Selecione um colaborador.');
 
       const nomeSnapshot = E.f_colab_id.selectedOptions[0]?.textContent || null;
-
       const payload = {
         colaborador_id,
-        colaborador: nomeSnapshot, // compatibilidade
+        colaborador: nomeSnapshot,
         data_ocorrencia: E.f_data_ocorrencia.value,
         data_aplicacao:  E.f_data_aplicacao.value,
         tipo:            E.f_tipo.value,
@@ -540,7 +550,3 @@
   </script>
 </body>
 </html>
-
-
-
-
