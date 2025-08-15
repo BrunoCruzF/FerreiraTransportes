@@ -52,3 +52,22 @@ button:hover{opacity:.95}
 .footer{
   text-align:center; padding:14px; color:#9ca3af; font-size:12px;
 }
+/* Contraste melhor no select – tema escuro */
+select, select option {
+  color: #e5e7eb;                 /* texto claro */
+  background-color: #0a1120;      /* fundo escuro no dropdown */
+}
+
+/* Quando estiver no tema claro, invertemos */
+body[data-theme="light"] select,
+body[data-theme="light"] select option {
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+/* deixa o item selecionado visível mesmo com highlight do sistema */
+select:focus {
+  outline: 2px solid color-mix(in oklab, var(--accent) 60%, #ffffff 40%);
+  outline-offset: 2px;
+}
+
