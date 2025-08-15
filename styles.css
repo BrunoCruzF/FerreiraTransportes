@@ -1,0 +1,54 @@
+* { box-sizing: border-box; }
+:root{
+  --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --border:#1f2a44;
+  --txt:#e5e7eb; --muted:#9aa4b2; --accent:#22c55e; --accentText:#06270e;
+}
+html,body{height:100%}
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;
+  color:var(--txt); background:linear-gradient(180deg,var(--bg),var(--bg2));
+  display:flex; flex-direction:column;
+}
+.topbar{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; padding:14px 18px;
+  background:rgba(11,18,32,0.6); backdrop-filter:blur(8px); border-bottom:1px solid var(--border);
+}
+.brand{display:flex; align-items:center; gap:10px}
+.logo{display:inline-grid; place-items:center; width:28px; height:28px; border-radius:8px; background:var(--accent); color:var(--accentText); font-weight:900}
+h1{margin:0; font-size:18px}
+.container{max-width:420px; width:100%; margin:40px auto; padding:0 16px; flex:1}
+
+.card{
+  background:linear-gradient(180deg,var(--card),#0c1222);
+  border:1px solid var(--border); border-radius:16px; padding:20px;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+}
+.card-auth h2{margin-top:0; margin-bottom:12px}
+label{display:block; margin:12px 0 6px}
+input{
+  width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+  background:#0a1120; color:var(--txt); outline:none;
+}
+input:focus{border-color:#2a3a60}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px}
+button{
+  padding:12px 16px; border-radius:12px; border:1px solid var(--border); cursor:pointer;
+  font-weight:700;
+}
+button.primary, button:not(.secondary):not(.linklike){ background:var(--accent); color:var(--accentText); }
+button.secondary{ background:#0a1120; color:var(--txt); }
+button:disabled{opacity:.6; cursor:not-allowed}
+button:hover{opacity:.95}
+.linklike{
+  background:transparent; color:#cbd5e1; border-color:transparent; padding:8px 0;
+  text-decoration:underline; font-weight:600;
+}
+
+.muted{color:var(--muted); font-size:14px; margin-top:8px}
+.hint{color:#91a0b6; font-size:13px; margin-top:8px}
+.hidden{display:none}
+
+.footer{
+  text-align:center; padding:14px; color:#9ca3af; font-size:12px;
+}
