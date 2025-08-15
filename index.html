@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Controle de Advertências</title>
-  <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="icon" href="data:,">
   <style>
     * { box-sizing: border-box; }
     :root{
@@ -45,7 +45,7 @@
       padding:12px 16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; font-weight:700;
     }
     .primary{ background:var(--accent); color:var(--accentText); }
-    .secondary{ background:#0a1120; color:var(--txt); }
+    .secondary{ background:#0a1120; color:#fff; }
     .danger{ background:#ef4444; color:#fff; border-color:#7f1d1d }
     table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px}
     th,td{border:1px solid #1f2a44; padding:10px; text-align:left}
@@ -138,11 +138,17 @@
 
   <footer class="footer">Desenvolvido por Bruno Ferreira da Cruz</footer>
 
+  <!-- 1) Carrega a biblioteca do Supabase (global: window.supabase) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+
+  <!-- 2) Seu app (só roda após a lib acima carregar) -->
   <script>
     // ========== SUPABASE CONFIG ==========
     const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co"; // TROQUE
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";            // TROQUE
+
+    // importante: usar o global "supabase" que a UMD injeta
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ====== ELEMENTOS ======
     const E = {
@@ -168,6 +174,7 @@
 
     // ====== UI / AUTH ======
     function setErr(t){ E.msg.textContent = t; E.msg.style.color = '#fca5a5'; }
+    function setOk(t){ E.msg.textContent = t; E.msg.style.color = '#a7f3d0'; }
     function setLogged(session){
       const logged = !!session;
       E.viewAuth.classList.toggle('hidden', logged);
@@ -179,57 +186,59 @@
     E.btnLogin.addEventListener('click', async ()=>{
       const email = E.email.value.trim(), password = E.password.value;
       if(!email||!password) return setErr('Preencha e-mail e senha.');
-      const { error } = await supabase.auth.signInWithPassword({ email,password });
+      const { error } = await supabaseClient.auth.signInWithPassword({ email,password });
       if(error) return setErr(error.message);
     });
     E.btnSignup.addEventListener('click', async ()=>{
       const email = E.email.value.trim(), password = E.password.value;
       if(!email||!password) return setErr('Defina um e-mail e uma senha.');
-      const { error } = await supabase.auth.signUp({ email,password });
+      const { error } = await supabaseClient.auth.signUp({ email,password });
       if(error) return setErr(error.message);
-      E.msg.style.color = '#a7f3d0'; E.msg.textContent = 'Conta criada! (confirmação desativada).';
+      setOk('Conta criada! (confirmação desativada).');
     });
     E.btnRecover.addEventListener('click', async ()=>{
       const email = E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
       if(error) return setErr(error.message);
-      E.msg.style.color = '#a7f3d0'; E.msg.textContent = 'Se existir, enviaremos um link de redefinição.';
+      setOk('Se existir, enviaremos um link de redefinição.');
     });
-    E.btnLogout.addEventListener('click', async ()=>{ await supabase.auth.signOut(); });
+    E.btnLogout.addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); });
 
     // ====== DATA ======
-    const BUCKET = 'adv_docs'; // bucket do Storage
+    const BUCKET = 'adv_docs';
     function uuidv4(){
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
         const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
       });
     }
-    function escapeHtml(s){return (s||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
     async function listar(){
-      const { data, error } = await supabase.from('adv_registros').select('*').order('data_ocorrencia',{ascending:false});
+      const { data, error } = await supabaseClient
+        .from('adv_registros')
+        .select('*')
+        .order('data_ocorrencia',{ascending:false});
       if(error){ console.error(error); return; }
       render(data||[]);
     }
+
     function render(items){
       E.tbl.innerHTML = '';
       if(!items.length){ E.empty.classList.remove('hidden'); return; }
       E.empty.classList.add('hidden');
+
       for(const r of items){
         const tr = document.createElement('tr');
 
-        const linkCell = document.createElement('td');
-        let linkEl = document.createElement(r.arquivo_path ? 'a' : 'span');
+        const tdCol = document.createElement('td');
         if(r.arquivo_path){
-          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
-          linkEl.href = pub.publicUrl;
-          linkEl.target = '_blank';
-          linkEl.rel = 'noopener';
-          linkEl.textContent = r.colaborador;
+          const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
+          const a = document.createElement('a');
+          a.href = pub.publicUrl; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = r.colaborador;
+          tdCol.appendChild(a);
         } else {
-          linkEl.textContent = r.colaborador;
+          tdCol.textContent = r.colaborador;
         }
-        linkCell.appendChild(linkEl);
 
         const tdOc = document.createElement('td'); tdOc.textContent = r.data_ocorrencia ? new Date(r.data_ocorrencia).toLocaleDateString() : '—';
         const tdAp = document.createElement('td'); tdAp.textContent = r.data_aplicacao ? new Date(r.data_aplicacao).toLocaleDateString() : '—';
@@ -240,15 +249,15 @@
         bt.addEventListener('click', ()=>delRegistro(r.id, r.arquivo_path));
         tdDel.appendChild(bt);
 
-        tr.appendChild(linkCell); tr.appendChild(tdOc); tr.appendChild(tdAp); tr.appendChild(tdTp); tr.appendChild(tdDel);
+        tr.appendChild(tdCol); tr.appendChild(tdOc); tr.appendChild(tdAp); tr.appendChild(tdTp); tr.appendChild(tdDel);
         E.tbl.appendChild(tr);
       }
     }
 
     async function delRegistro(id, arquivo_path){
       if(!confirm('Excluir este registro?')) return;
-      await supabase.from('adv_registros').delete().eq('id', id);
-      if(arquivo_path){ await supabase.storage.from(BUCKET).remove([arquivo_path]); }
+      await supabaseClient.from('adv_registros').delete().eq('id', id);
+      if(arquivo_path){ await supabaseClient.storage.from(BUCKET).remove([arquivo_path]); }
     }
 
     E.formAdv.addEventListener('submit', async (e)=>{
@@ -262,38 +271,37 @@
       };
       if(!payload.colaborador) return alert('Informe o colaborador.');
 
-      // 1) Se tiver arquivo, sobe para o Storage
       const file = E.f_arquivo.files[0];
       if (file){
         const ext = (file.name.split('.').pop() || '').toLowerCase();
         if(!['png','pdf'].includes(ext)) return alert('Envie um PNG ou PDF.');
         const path = `${uuidv4()}/${Date.now()}_${file.name}`;
-        const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
+        const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, file, {
+          cacheControl: '3600', upsert: false
+        });
         if(upErr){ alert('Falha no upload: '+upErr.message); return; }
         payload.arquivo_path = path;
       }
 
-      // 2) Insere o registro
-      const { error } = await supabase.from('adv_registros').insert(payload);
+      const { error } = await supabaseClient.from('adv_registros').insert(payload);
       if(error){ alert('Erro ao salvar: '+error.message); return; }
       e.target.reset();
     });
 
-    // ====== INIT / SESSION / REALTIME ======
+    // ====== INIT ======
     (async function init(){
-      // datas padrão
       const today = new Date().toISOString().slice(0,10);
-      E.f_data_ocorrencia.value = today;
-      E.f_data_aplicacao.value = today;
+      document.getElementById('f_data_ocorrencia').value = today;
+      document.getElementById('f_data_aplicacao').value = today;
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseClient.auth.getSession();
       setLogged(session);
       if(session){ await listar(); }
 
-      supabase.auth.onAuthStateChange((_e, s)=>{ setLogged(s); if(s) listar(); });
+      supabaseClient.auth.onAuthStateChange((_e, s)=>{ setLogged(s); if(s) listar(); });
 
-      // realtime
-      supabase.channel('adv-rt')
+      // Realtime (precisa estar habilitado na tabela)
+      supabaseClient.channel('adv-rt')
         .on('postgres_changes', { event:'*', schema:'public', table:'adv_registros' }, listar)
         .subscribe();
     })();
