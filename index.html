@@ -3,23 +3,76 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Controle de Advertências – Login</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <title>Controle de Advertências</title>
   <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script defer src="./login.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    :root{
+      --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --border:#1f2a44;
+      --txt:#e5e7eb; --muted:#9aa4b2; --accent:#22c55e; --accentText:#06270e;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;
+      color:var(--txt); background:linear-gradient(180deg,var(--bg),var(--bg2));
+      display:flex; flex-direction:column;
+    }
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 18px; background:rgba(11,18,32,0.6); backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    .brand{display:flex; align-items:center; gap:10px}
+    .logo{display:inline-grid; place-items:center; width:28px; height:28px; border-radius:8px; background:var(--accent); color:var(--accentText); font-weight:900}
+    .userbox{display:flex; gap:10px; align-items:center; color:#cbd5e1; font-size:14px}
+    .container{max-width:1100px; width:100%; margin:24px auto; padding:0 16px; flex:1}
+    .card{
+      background:linear-gradient(180deg,var(--card),#0c1222);
+      border:1px solid var(--border); border-radius:16px; padding:18px;
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+    }
+    .grid-4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    label{display:block; font-size:14px; color:#cbd5e1}
+    input, select, textarea{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+      background:#0a1120; color:var(--txt); outline:none; margin-top:6px;
+    }
+    input[type="file"]{ padding:8px; }
+    input:focus,select:focus,textarea:focus{border-color:#2a3a60}
+    button{
+      padding:12px 16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; font-weight:700;
+    }
+    .primary{ background:var(--accent); color:var(--accentText); }
+    .secondary{ background:#0a1120; color:var(--txt); }
+    .danger{ background:#ef4444; color:#fff; border-color:#7f1d1d }
+    table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px}
+    th,td{border:1px solid #1f2a44; padding:10px; text-align:left}
+    th{background:#0a1120}
+    a{ color:#93c5fd; text-decoration:underline; }
+    .muted{color:var(--muted)}
+    .hidden{display:none}
+    .footer{ text-align:center; padding:14px; color:#9ca3af; font-size:12px; }
+    .container-sm{max-width:420px; width:100%; margin:40px auto; padding:0 16px}
+  </style>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
       <span class="logo">⚑</span>
-      <h1>Controle de Advertências</h1>
+      <h1 style="margin:0;font-size:18px">Controle de Advertências</h1>
+    </div>
+    <div class="userbox">
+      <span id="user-email">Deslogado</span>
+      <button id="btn-logout" class="secondary hidden">Sair</button>
     </div>
   </header>
 
-  <main class="container">
-    <!-- Card de Login -->
-    <section id="login-card" class="card card-auth">
-      <h2>Acesse sua conta</h2>
+  <!-- LOGIN -->
+  <main id="view-auth" class="container-sm">
+    <section class="card">
+      <h2 style="margin:0 0 12px">Acesse sua conta</h2>
       <label>E-mail
         <input type="email" id="email" placeholder="voce@empresa.com.br" autocomplete="username" />
       </label>
@@ -27,31 +80,223 @@
         <input type="password" id="password" placeholder="********" autocomplete="current-password" />
       </label>
       <div class="row">
-        <button id="btn-login">Entrar</button>
+        <button id="btn-login" class="primary">Entrar</button>
         <button id="btn-signup" class="secondary">Criar conta</button>
+        <button id="btn-recover" class="secondary">Esqueci minha senha</button>
       </div>
-
-      <div class="row extras">
-        <button id="btn-recover" class="linklike">Esqueci minha senha</button>
-      </div>
-
       <p id="auth-msg" class="muted"></p>
-    </section>
-
-    <!-- Estado logado (temporário até criarmos o painel) -->
-    <section id="logged-card" class="card hidden">
-      <h2>Bem-vindo!</h2>
-      <p id="user-email" class="muted"></p>
-      <div class="row">
-        <button id="btn-go" class="primary" disabled>Entrar no Sistema</button>
-        <button id="btn-logout" class="secondary">Sair</button>
-      </div>
-      <p class="hint">Assim que finalizarmos o painel, o botão “Entrar no Sistema” levará para a tela principal.</p>
     </section>
   </main>
 
-  <footer class="footer">
-    Desenvolvido por Bruno Ferreira da Cruz
-  </footer>
+  <!-- PAINEL PRINCIPAL: CADASTRO + LISTA -->
+  <main id="view-app" class="container hidden">
+    <section class="card">
+      <h2 style="margin-top:0">Cadastrar Advertência</h2>
+      <form id="form-adv" class="grid-4">
+        <label>Colaborador
+          <input id="f_colaborador" placeholder="Nome do colaborador" required />
+        </label>
+        <label>Data da ocorrência
+          <input type="date" id="f_data_ocorrencia" required />
+        </label>
+        <label>Data da aplicação
+          <input type="date" id="f_data_aplicacao" required />
+        </label>
+        <label>Tipo de advertência
+          <select id="f_tipo" required>
+            <option>Verbal</option>
+            <option>Falta não justificada</option>
+            <option>Atraso</option>
+          </select>
+        </label>
+        <label style="grid-column:1/-1">Anexo (PNG ou PDF)
+          <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" />
+        </label>
+        <div class="row" style="grid-column:1/-1">
+          <button class="primary" type="submit">Salvar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Registros</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Colaborador (download)</th>
+            <th>Ocorrência</th>
+            <th>Aplicação</th>
+            <th>Tipo</th>
+            <th style="width:1%"></th>
+          </tr>
+        </thead>
+        <tbody id="tbl-reg"></tbody>
+      </table>
+      <p id="empty" class="muted">Nenhum registro ainda.</p>
+    </section>
+  </main>
+
+  <footer class="footer">Desenvolvido por Bruno Ferreira da Cruz</footer>
+
+  <script>
+    // ========== SUPABASE CONFIG ==========
+    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co"; // TROQUE
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ====== ELEMENTOS ======
+    const E = {
+      viewAuth: document.getElementById('view-auth'),
+      viewApp: document.getElementById('view-app'),
+      userEmail: document.getElementById('user-email'),
+      btnLogout: document.getElementById('btn-logout'),
+      email: document.getElementById('email'),
+      password: document.getElementById('password'),
+      btnLogin: document.getElementById('btn-login'),
+      btnSignup: document.getElementById('btn-signup'),
+      btnRecover: document.getElementById('btn-recover'),
+      msg: document.getElementById('auth-msg'),
+      formAdv: document.getElementById('form-adv'),
+      f_colaborador: document.getElementById('f_colaborador'),
+      f_data_ocorrencia: document.getElementById('f_data_ocorrencia'),
+      f_data_aplicacao: document.getElementById('f_data_aplicacao'),
+      f_tipo: document.getElementById('f_tipo'),
+      f_arquivo: document.getElementById('f_arquivo'),
+      tbl: document.getElementById('tbl-reg'),
+      empty: document.getElementById('empty'),
+    };
+
+    // ====== UI / AUTH ======
+    function setErr(t){ E.msg.textContent = t; E.msg.style.color = '#fca5a5'; }
+    function setLogged(session){
+      const logged = !!session;
+      E.viewAuth.classList.toggle('hidden', logged);
+      E.viewApp.classList.toggle('hidden', !logged);
+      E.btnLogout.classList.toggle('hidden', !logged);
+      E.userEmail.textContent = logged ? session.user.email : 'Deslogado';
+    }
+
+    E.btnLogin.addEventListener('click', async ()=>{
+      const email = E.email.value.trim(), password = E.password.value;
+      if(!email||!password) return setErr('Preencha e-mail e senha.');
+      const { error } = await supabase.auth.signInWithPassword({ email,password });
+      if(error) return setErr(error.message);
+    });
+    E.btnSignup.addEventListener('click', async ()=>{
+      const email = E.email.value.trim(), password = E.password.value;
+      if(!email||!password) return setErr('Defina um e-mail e uma senha.');
+      const { error } = await supabase.auth.signUp({ email,password });
+      if(error) return setErr(error.message);
+      E.msg.style.color = '#a7f3d0'; E.msg.textContent = 'Conta criada! (confirmação desativada).';
+    });
+    E.btnRecover.addEventListener('click', async ()=>{
+      const email = E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      if(error) return setErr(error.message);
+      E.msg.style.color = '#a7f3d0'; E.msg.textContent = 'Se existir, enviaremos um link de redefinição.';
+    });
+    E.btnLogout.addEventListener('click', async ()=>{ await supabase.auth.signOut(); });
+
+    // ====== DATA ======
+    const BUCKET = 'adv_docs'; // bucket do Storage
+    function uuidv4(){
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+        const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
+      });
+    }
+    function escapeHtml(s){return (s||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+
+    async function listar(){
+      const { data, error } = await supabase.from('adv_registros').select('*').order('data_ocorrencia',{ascending:false});
+      if(error){ console.error(error); return; }
+      render(data||[]);
+    }
+    function render(items){
+      E.tbl.innerHTML = '';
+      if(!items.length){ E.empty.classList.remove('hidden'); return; }
+      E.empty.classList.add('hidden');
+      for(const r of items){
+        const tr = document.createElement('tr');
+
+        const linkCell = document.createElement('td');
+        let linkEl = document.createElement(r.arquivo_path ? 'a' : 'span');
+        if(r.arquivo_path){
+          const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
+          linkEl.href = pub.publicUrl;
+          linkEl.target = '_blank';
+          linkEl.rel = 'noopener';
+          linkEl.textContent = r.colaborador;
+        } else {
+          linkEl.textContent = r.colaborador;
+        }
+        linkCell.appendChild(linkEl);
+
+        const tdOc = document.createElement('td'); tdOc.textContent = r.data_ocorrencia ? new Date(r.data_ocorrencia).toLocaleDateString() : '—';
+        const tdAp = document.createElement('td'); tdAp.textContent = r.data_aplicacao ? new Date(r.data_aplicacao).toLocaleDateString() : '—';
+        const tdTp = document.createElement('td'); tdTp.textContent = r.tipo || '—';
+
+        const tdDel = document.createElement('td');
+        const bt = document.createElement('button'); bt.className = 'danger'; bt.textContent = 'Excluir';
+        bt.addEventListener('click', ()=>delRegistro(r.id, r.arquivo_path));
+        tdDel.appendChild(bt);
+
+        tr.appendChild(linkCell); tr.appendChild(tdOc); tr.appendChild(tdAp); tr.appendChild(tdTp); tr.appendChild(tdDel);
+        E.tbl.appendChild(tr);
+      }
+    }
+
+    async function delRegistro(id, arquivo_path){
+      if(!confirm('Excluir este registro?')) return;
+      await supabase.from('adv_registros').delete().eq('id', id);
+      if(arquivo_path){ await supabase.storage.from(BUCKET).remove([arquivo_path]); }
+    }
+
+    E.formAdv.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const payload = {
+        colaborador: E.f_colaborador.value.trim(),
+        data_ocorrencia: E.f_data_ocorrencia.value,
+        data_aplicacao: E.f_data_aplicacao.value,
+        tipo: E.f_tipo.value,
+        arquivo_path: null,
+      };
+      if(!payload.colaborador) return alert('Informe o colaborador.');
+
+      // 1) Se tiver arquivo, sobe para o Storage
+      const file = E.f_arquivo.files[0];
+      if (file){
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        if(!['png','pdf'].includes(ext)) return alert('Envie um PNG ou PDF.');
+        const path = `${uuidv4()}/${Date.now()}_${file.name}`;
+        const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
+        if(upErr){ alert('Falha no upload: '+upErr.message); return; }
+        payload.arquivo_path = path;
+      }
+
+      // 2) Insere o registro
+      const { error } = await supabase.from('adv_registros').insert(payload);
+      if(error){ alert('Erro ao salvar: '+error.message); return; }
+      e.target.reset();
+    });
+
+    // ====== INIT / SESSION / REALTIME ======
+    (async function init(){
+      // datas padrão
+      const today = new Date().toISOString().slice(0,10);
+      E.f_data_ocorrencia.value = today;
+      E.f_data_aplicacao.value = today;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      setLogged(session);
+      if(session){ await listar(); }
+
+      supabase.auth.onAuthStateChange((_e, s)=>{ setLogged(s); if(s) listar(); });
+
+      // realtime
+      supabase.channel('adv-rt')
+        .on('postgres_changes', { event:'*', schema:'public', table:'adv_registros' }, listar)
+        .subscribe();
+    })();
+  </script>
 </body>
 </html>
