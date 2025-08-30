@@ -6,118 +6,78 @@
   <title>Controle de Advertências</title>
   <link rel="icon" href="data:,">
   <style>
-    * { box-sizing: border-box; }
+    *{box-sizing:border-box}
     :root{
       --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --card2:#0c1325; --border:#1f2a44;
       --txt:#e5e7eb; --muted:#9aa4b2; --accent:#22c55e; --accentText:#06270e;
-      --btnText:#e5e7eb; --tableHead:#0a1120;
-      --field:#0a1120; --fieldBorder:#253555; --fieldShadow:rgba(0,0,0,.35);
+      --btnText:#e5e7eb; --tableHead:#0a1120; --field:#0a1120; --fieldBorder:#253555; --fieldShadow:rgba(0,0,0,.35);
     }
     body[data-theme="light"]{
       --bg:#f5f7fb; --bg2:#eef2f9; --card:#ffffff; --card2:#f8fafc; --border:#e5e7eb;
       --txt:#0f172a; --muted:#596173; --accent:#2563eb; --accentText:#ffffff;
-      --btnText:#0f172a; --tableHead:#f4f6fb;
-      --field:#ffffff; --fieldBorder:#d9dee8; --fieldShadow:rgba(9,30,66,.15);
+      --btnText:#0f172a; --tableHead:#f4f6fb; --field:#ffffff; --fieldBorder:#d9dee8; --fieldShadow:rgba(9,30,66,.15);
     }
     @media (prefers-color-scheme: light){
-      body:not([data-theme]){
-        --bg:#f5f7fb; --bg2:#eef2f9; --card:#ffffff; --card2:#f8fafc; --border:#e5e7eb;
-        --txt:#0f172a; --muted:#596173; --accent:#2563eb; --accentText:#ffffff;
-        --btnText:#0f172a; --tableHead:#f4f6fb;
-        --field:#ffffff; --fieldBorder:#d9dee8; --fieldShadow:rgba(9,30,66,.15);
-      }
+      body:not([data-theme]){--bg:#f5f7fb;--bg2:#eef2f9;--card:#ffffff;--card2:#f8fafc;--border:#e5e7eb;--txt:#0f172a;--muted:#596173;--accent:#2563eb;--accentText:#fff;--btnText:#0f172a;--tableHead:#f4f6fb;--field:#fff;--fieldBorder:#d9dee8;--fieldShadow:rgba(9,30,66,.15)}
     }
-
     html,body{height:100%}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;
-      color:var(--txt);
-      background:linear-gradient(180deg,var(--bg),var(--bg2));
-      display:flex; flex-direction:column; transition: background .25s ease, color .25s ease;
-    }
-
-    .topbar{
-      position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
-      gap:14px; padding:10px 16px; background:rgba(11,18,32,0.08); backdrop-filter:blur(8px);
-      border-bottom:1px solid var(--border);
-    }
-    body[data-theme="light"] .topbar{ background:rgba(255,255,255,0.7); }
-    .brand{display:flex; align-items:center; gap:10px}
-    .brand a{display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit}
-    .brand img.logo-img{ height: clamp(48px, 8vh, 80px); width:auto; display:block; border-radius:10px; box-shadow: 0 6px 18px rgba(0,0,0,.15) }
-    .brand h1{margin:0; font-size:18px; letter-spacing:.2px}
-    .userbox{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:14px}
-    .icon-btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--btnText); cursor:pointer; font-weight:600}
-
-    .container{max-width:1320px; width:100%; margin:24px auto; padding:0 16px; flex:1}
-    .card{
-      background:linear-gradient(180deg,var(--card),var(--card2));
-      border:1px solid var(--border); border-radius:16px; padding:18px;
-      box-shadow:0 18px 40px rgba(0,0,0,.10);
-    }
-    .tabs{display:flex; gap:10px; margin-bottom:12px}
-    .tabs button{padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:transparent; color:var(--txt); cursor:pointer; font-weight:700}
-    .tabs button.active{background:var(--accent); color:var(--accentText); border-color:transparent}
-    .grid-4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px}
-    .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    label{display:block; font-size:14px; color:var(--muted)}
-
-    .field{
-      width:100%; margin-top:6px; padding:12px 14px; border-radius:14px;
-      border:1.5px solid var(--fieldBorder); background:var(--field);
-      box-shadow: 0 8px 20px var(--fieldShadow);
-      color:var(--txt); outline:none; transition:border-color .15s ease, box-shadow .15s ease;
-    }
-    .field:focus{
-      border-color: color-mix(in oklab, var(--accent) 60%, var(--fieldBorder) 40%);
-      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 25%, transparent);
-    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;color:var(--txt);
+      background:linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;transition:background .25s,color .25s}
+    .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 16px;background:rgba(11,18,32,.08);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+    body[data-theme="light"] .topbar{background:rgba(255,255,255,.7)}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand a{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .brand img.logo-img{height:clamp(48px,8vh,80px);width:auto;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+    .brand h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .userbox{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:14px}
+    .icon-btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--btnText);cursor:pointer;font-weight:600}
+    .container{max-width:1320px;width:100%;margin:24px auto;padding:0 16px;flex:1}
+    .container-sm{max-width:420px;width:100%;margin:40px auto;padding:0 16px}
+    .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.10)}
+    .tabs{display:flex;gap:10px;margin-bottom:12px}
+    .tabs button{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--txt);cursor:pointer;font-weight:700}
+    .tabs button.active{background:var(--accent);color:var(--accentText);border-color:transparent}
+    .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    label{display:block;font-size:14px;color:var(--muted)}
+    .field{width:100%;margin-top:6px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--fieldBorder);background:var(--field);
+      box-shadow:0 8px 20px var(--fieldShadow);color:var(--txt);outline:none;transition:border-color .15s,box-shadow .15s}
+    .field:focus{border-color:color-mix(in oklab,var(--accent) 60%,var(--fieldBorder) 40%);box-shadow:0 0 0 4px color-mix(in oklab,var(--accent) 25%, transparent)}
     input[readonly].field{opacity:.9}
-
-    select.field, select.field option { color:var(--txt); background:var(--field) }
-    body[data-theme="light"] select.field, body[data-theme="light"] select.field option{ color:#0f172a; background:#ffffff }
-
-    button{padding:12px 16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; font-weight:700}
-    .primary{ background:var(--accent); color:var(--accentText); border-color:transparent }
-    .secondary{ background:transparent; color:var(--btnText); }
-    .danger{ background:#ef4444; color:#fff; border-color:#7f1d1d }
-
-    table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px}
-    th,td{border:1px solid var(--border); padding:10px; text-align:left}
+    select.field,select.field option{color:var(--txt);background:var(--field)}
+    body[data-theme="light"] select.field,body[data-theme="light"] select.field option{color:#0f172a;background:#fff}
+    button{padding:12px 16px;border-radius:12px;border:1px solid var(--border);cursor:pointer;font-weight:700}
+    .primary{background:var(--accent);color:var(--accentText);border-color:transparent}
+    .secondary{background:transparent;color:var(--btnText)}
+    .danger{background:#ef4444;color:#fff;border-color:#7f1d1d}
+    table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+    th,td{border:1px solid var(--border);padding:10px;text-align:left}
     th{background:var(--tableHead)}
-    a{ color:color-mix(in oklab, var(--accent) 70%, #ffffff 30%); text-decoration:underline; }
+    a{color:color-mix(in oklab,var(--accent) 70%,#fff 30%);text-decoration:underline}
     .muted{color:var(--muted)}
     .hidden{display:none}
-    .footer{ text-align:center; padding:14px; color:var(--muted); font-size:12px; }
-    .container-sm{max-width:420px; width:100%; margin:40px auto; padding:0 16px}
-
-    .icon{ display:inline-flex; align-items:center; justify-content:center;
-      width:36px; height:36px; border-radius:10px; border:1px solid var(--border);
-      background:transparent; cursor:pointer; font-size:18px; }
-    .actions-inline{ display:flex; gap:8px; align-items:center; }
-
-    /* agrupador */
-    .grp{ border:1px solid var(--border); border-radius:12px; margin-top:12px; overflow:hidden }
-    .grp-h{ display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding:14px 16px; background:var(--tableHead); cursor:pointer; }
-    .grp-h strong{ font-size:16px }
-    .grp-h small{ color:var(--muted) }
-    .grp-b{ display:none; padding:0 10px 10px; }
-    .grp.open .grp-b{ display:block; }
-    .pill{ background:var(--accent); color:var(--accentText); border-radius:999px; padding:2px 10px; font-weight:700; }
+    .footer{text-align:center;padding:14px;color:var(--muted);font-size:12px}
+    .icon{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:18px}
+    .actions-inline{display:flex;gap:8px;align-items:center}
+    .grp{border:1px solid var(--border);border-radius:12px;margin-top:12px;overflow:hidden}
+    .grp-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:var(--tableHead);cursor:pointer}
+    .grp-h strong{font-size:16px}
+    .grp-h small{color:var(--muted)}
+    .grp-b{display:none;padding:0 10px 10px}
+    .grp.open .grp-b{display:block}
+    .pill{background:var(--accent);color:var(--accentText);border-radius:999px;padding:2px 10px;font-weight:700}
+    @media (max-width:820px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}.brand h1{font-size:16px}}
+    @media (max-width:480px){.grid-4,.grid-3{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <a href="#" id="home-link" title="Ir para Colaboradores">
-        <img src="./logo.png" alt="Ferreira Transportes & Logística" class="logo-img" />
-        <h1>Controle de Advertências</h1>
-      </a>
+      <a href="#" id="home-link"><img src="./logo.png" alt="Ferreira Transportes & Logística" class="logo-img"/><h1>Controle de Advertências</h1></a>
     </div>
     <div class="userbox">
-      <button id="btn-theme" class="icon-btn" title="Alternar tema">🌙 Tema</button>
+      <button id="btn-theme" class="icon-btn">🌙 Tema</button>
       <span id="user-email">Deslogado</span>
       <button id="btn-logout" class="icon-btn hidden">Sair</button>
     </div>
@@ -127,12 +87,8 @@
   <main id="view-auth" class="container-sm">
     <section class="card">
       <h2 style="margin:0 0 12px">Acesse sua conta</h2>
-      <label>E-mail
-        <input type="email" id="email" placeholder="voce@empresa.com.br" autocomplete="username" class="field" />
-      </label>
-      <label>Senha
-        <input type="password" id="password" placeholder="********" autocomplete="current-password" class="field" />
-      </label>
+      <label>E-mail <input type="email" id="email" placeholder="voce@empresa.com.br" autocomplete="username" class="field"/></label>
+      <label>Senha  <input type="password" id="password" placeholder="********" autocomplete="current-password" class="field"/></label>
       <div class="row">
         <button id="btn-login" class="primary">Entrar</button>
         <button id="btn-signup" class="secondary">Criar conta</button>
@@ -152,108 +108,67 @@
 
     <!-- COLABORADORES -->
     <section id="tab-colab" class="card">
-      <div class="row" style="justify-content:space-between; align-items:center;">
+      <div class="row" style="justify-content:space-between;align-items:center">
         <h2 style="margin:0">Colaboradores</h2>
         <button id="toggle-colab-form" class="primary">Cadastrar Colaborador</button>
       </div>
-
       <form id="form-colab" class="grid-3 hidden" style="margin-top:16px">
-        <label>Nome
-          <input id="c_nome" placeholder="Ex.: Jandira Silva" class="field" required />
-        </label>
-        <label>CPF
-          <input id="c_cpf" placeholder="000.000.000-00" class="field" />
-        </label>
-        <label>CTPS
-          <input id="c_ctps" placeholder="CTPS" class="field" />
-        </label>
-        <label>Série
-          <input id="c_serie" placeholder="Série" class="field" />
-        </label>
+        <label>Nome  <input id="c_nome"  placeholder="Ex.: Jandira Silva" class="field" required/></label>
+        <label>CPF   <input id="c_cpf"   placeholder="000.000.000-00" class="field"/></label>
+        <label>CTPS  <input id="c_ctps"  placeholder="CTPS" class="field"/></label>
+        <label>Série <input id="c_serie" placeholder="Série" class="field"/></label>
         <div class="row" style="grid-column:1/-1">
           <button class="primary" type="submit">Adicionar</button>
           <button type="button" class="secondary" id="cancel-colab-form">Cancelar</button>
         </div>
       </form>
-
       <table style="margin-top:16px">
-        <thead>
-          <tr><th>Nome</th><th>CPF</th><th>CTPS</th><th>Série</th><th style="width:1%"></th></tr>
-        </thead>
+        <thead><tr><th>Nome</th><th>CPF</th><th>CTPS</th><th>Série</th><th style="width:1%"></th></tr></thead>
         <tbody id="tbl-colab"></tbody>
       </table>
       <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
     </section>
 
-    <!-- ADVERTÊNCIAS -->
+    <!-- ADVERTÊNCIAS (cadastro/edição) -->
     <section id="tab-adv" class="card hidden">
-      <div class="row" style="justify-content:space-between; align-items:center;">
+      <div class="row" style="justify-content:space-between;align-items:center">
         <h2 style="margin:0">Cadastrar Advertência</h2>
-        <div>
-          <button id="btn-new-adv" class="icon" title="Nova advertência">🆕</button>
-          <button id="btn-clear-adv" class="icon" title="Limpar formulário">🧹</button>
-        </div>
+        <div><button id="btn-new-adv" class="icon" title="Nova advertência">🆕</button><button id="btn-clear-adv" class="icon" title="Limpar formulário">🧹</button></div>
       </div>
-
       <form id="form-adv" class="grid-4">
-        <input type="hidden" id="f_editing_id" />
-
-        <!-- pesquisável com datalist -->
+        <input type="hidden" id="f_editing_id"/>
         <label>Colaborador
           <input id="f_colab_search" class="field" list="colab-list" placeholder="Digite para pesquisar..." autocomplete="off">
           <datalist id="colab-list"></datalist>
           <input type="hidden" id="f_colaborador_id">
         </label>
-
-        <label>CPF
-          <input id="f_cpf" readonly placeholder="—" class="field" />
-        </label>
-        <label>CTPS
-          <input id="f_ctps" readonly placeholder="—" class="field" />
-        </label>
-        <label>Série
-          <input id="f_serie" readonly placeholder="—" class="field" />
-        </label>
-
-        <label>Data da ocorrência
-          <input type="date" id="f_data_ocorrencia" required class="field" />
-        </label>
-        <label>Data da aplicação
-          <input type="date" id="f_data_aplicacao" required class="field" />
-        </label>
+        <label>CPF  <input id="f_cpf"  readonly placeholder="—" class="field"/></label>
+        <label>CTPS <input id="f_ctps" readonly placeholder="—" class="field"/></label>
+        <label>Série<input id="f_serie"readonly placeholder="—" class="field"/></label>
+        <label>Data da ocorrência <input type="date" id="f_data_ocorrencia" required class="field"/></label>
+        <label>Data da aplicação  <input type="date" id="f_data_aplicacao" required class="field"/></label>
         <label>Tipo de advertência
           <select id="f_tipo" required class="field">
-            <option>Verbal</option>
-            <option>Falta não justificada</option>
-            <option>Atraso</option>
+            <option>Verbal</option><option>Falta não justificada</option><option>Atraso</option>
           </select>
         </label>
-        <label id="grp_verbal">
-          Subtipo (quando Verbal)
-          <select id="f_verbal_sub" class="field">
-            <option>Atraso</option>
-            <option>Falta não justificada</option>
-          </select>
+        <label id="grp_verbal">Subtipo (quando Verbal)
+          <select id="f_verbal_sub" class="field"><option>Atraso</option><option>Falta não justificada</option></select>
         </label>
-
         <label style="grid-column:1/-1">Anexo (PNG ou PDF)
-          <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" class="field" />
+          <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" class="field"/>
         </label>
-
-        <div class="row" style="grid-column:1/-1">
-          <button class="primary" type="submit" title="Salvar (inserir ou atualizar)">💾 Salvar</button>
-        </div>
+        <div class="row" style="grid-column:1/-1"><button class="primary" type="submit">💾 Salvar</button></div>
       </form>
       <p class="muted" style="margin-top:8px">O formulário guarda rascunho automaticamente ao trocar de aba.</p>
     </section>
 
     <!-- REGISTROS AGRUPADOS -->
     <section id="tab-regs" class="card hidden">
-      <div class="row" style="justify-content:space-between; align-items:center;">
+      <div class="row" style="justify-content:space-between;align-items:center">
         <h2 style="margin:0">Registros de Advertência</h2>
-        <input id="filter" class="field" style="max-width:420px" placeholder="Filtrar por colaborador, CPF ou CTPS" />
+        <input id="filter" class="field" style="max-width:420px" placeholder="Filtrar por colaborador, CPF ou CTPS"/>
       </div>
-
       <div id="grp-container" style="margin-top:12px"></div>
       <p id="empty" class="muted">Nenhum registro ainda.</p>
     </section>
@@ -263,368 +178,156 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
   <script>
-    /* CONFIG */
-    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
-    const BUCKET = 'adv_docs';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    /* === CONFIG === */
+    const SUPABASE_URL="https://bgophlququlizkwioveu.supabase.co";
+    const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
+    const BUCKET='adv_docs';
+    const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY='adv_form_draft_v3';
-    const EDIT_KEY='adv_edit_id_v3';
+    const DRAFT_KEY='adv_form_d4'; const EDIT_KEY='adv_edit_id_d4';
 
-    /* ELEMENTOS */
-    const E={
-      viewAuth:document.getElementById('view-auth'),
-      viewApp:document.getElementById('view-app'),
-      btnLogout:document.getElementById('btn-logout'),
-      email:document.getElementById('email'),
-      password:document.getElementById('password'),
-      msg:document.getElementById('auth-msg'),
-      btnTheme:document.getElementById('btn-theme'),
+    /* === ELEMENTOS === */
+    const E={ viewAuth:$('#view-auth'), viewApp:$('#view-app'), btnLogout:$('#btn-logout'),
+      email:$('#email'),password:$('#password'),msg:$('#auth-msg'),btnTheme:$('#btn-theme'),
+      tabBtns:$$('.tabs button'), tabColab:$('#tab-colab'), tabAdv:$('#tab-adv'), tabRegs:$('#tab-regs'),
+      toggleColabForm:$('#toggle-colab-form'), cancelColabForm:$('#cancel-colab-form'),
+      formColab:$('#form-colab'), c_nome:$('#c_nome'), c_cpf:$('#c_cpf'), c_ctps:$('#c_ctps'), c_serie:$('#c_serie'),
+      tblColab:$('#tbl-colab'), colabEmpty:$('#colab-empty'),
+      formAdv:$('#form-adv'), f_edit:$('#f_editing_id'), f_search:$('#f_colab_search'), f_list:$('#colab-list'),
+      f_colab_id:$('#f_colaborador_id'), f_cpf:$('#f_cpf'), f_ctps:$('#f_ctps'), f_serie:$('#f_serie'),
+      f_oc:$('#f_data_ocorrencia'), f_ap:$('#f_data_aplicacao'), f_tipo:$('#f_tipo'),
+      f_verbal_grp:$('#grp_verbal'), f_verbal_sub:$('#f_verbal_sub'), f_file:$('#f_arquivo'),
+      btnNew:$('#btn-new-adv'), btnClear:$('#btn-clear-adv'),
+      filter:$('#filter'), grpContainer:$('#grp-container'), empty:$('#empty') };
 
-      tabBtns:document.querySelectorAll('.tabs button'),
-      tabColab:document.getElementById('tab-colab'),
-      tabAdv:document.getElementById('tab-adv'),
-      tabRegs:document.getElementById('tab-regs'),
+    function $(s){return document.querySelector(s)} function $$(s){return document.querySelectorAll(s)}
+    function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
-      toggleColabForm:document.getElementById('toggle-colab-form'),
-      cancelColabForm:document.getElementById('cancel-colab-form'),
-      formColab:document.getElementById('form-colab'),
-      c_nome:document.getElementById('c_nome'),
-      c_cpf:document.getElementById('c_cpf'),
-      c_ctps:document.getElementById('c_ctps'),
-      c_serie:document.getElementById('c_serie'),
-      tblColab:document.getElementById('tbl-colab'),
-      colabEmpty:document.getElementById('colab-empty'),
-
-      formAdv:document.getElementById('form-adv'),
-      f_edit:document.getElementById('f_editing_id'),
-      f_search:document.getElementById('f_colab_search'),
-      f_list:document.getElementById('colab-list'),
-      f_colab_id:document.getElementById('f_colaborador_id'),
-      f_cpf:document.getElementById('f_cpf'),
-      f_ctps:document.getElementById('f_ctps'),
-      f_serie:document.getElementById('f_serie'),
-      f_oc:document.getElementById('f_data_ocorrencia'),
-      f_ap:document.getElementById('f_data_aplicacao'),
-      f_tipo:document.getElementById('f_tipo'),
-      f_verbal_grp:document.getElementById('grp_verbal'),
-      f_verbal_sub:document.getElementById('f_verbal_sub'),
-      f_file:document.getElementById('f_arquivo'),
-      btnNew:document.getElementById('btn-new-adv'),
-      btnClear:document.getElementById('btn-clear-adv'),
-
-      filter:document.getElementById('filter'),
-      grpContainer:document.getElementById('grp-container'),
-      empty:document.getElementById('empty'),
-    };
-
-    /* THEME */
+    /* === Tema === */
     const THEME_KEY='ft_theme';
-    function applyTheme(t){
-      if(t) document.body.setAttribute('data-theme',t);
-      else document.body.removeAttribute('data-theme');
-      E.btnTheme.textContent=(document.body.getAttribute('data-theme')==='light'||
-        (!document.body.hasAttribute('data-theme')&&matchMedia('(prefers-color-scheme: light)').matches))?'🌞 Tema':'🌙 Tema';
-    }
+    function applyTheme(t){ if(t)document.body.setAttribute('data-theme',t); else document.body.removeAttribute('data-theme');
+      const isLight=(document.body.getAttribute('data-theme')==='light')||(!document.body.hasAttribute('data-theme')&&matchMedia('(prefers-color-scheme: light)').matches);
+      E.btnTheme.textContent=isLight?'🌞 Tema':'🌙 Tema';}
+    E.btnTheme.onclick=()=>{const c=document.body.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.body.setAttribute('data-theme',n);localStorage.setItem(THEME_KEY,n);applyTheme(n);}
     applyTheme(localStorage.getItem(THEME_KEY));
-    E.btnTheme.onclick=()=>{const c=document.body.getAttribute('data-theme'); const n=c==='light'?'dark':'light'; document.body.setAttribute('data-theme',n); localStorage.setItem(THEME_KEY,n); applyTheme(n);};
 
-    /* TABS (salva rascunho ao trocar) */
-    function setTab(n){
-      saveDraft();
-      E.tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
-      E.tabColab.classList.toggle('hidden',n!=='colab');
-      E.tabAdv.classList.toggle('hidden',n!=='adv');
-      E.tabRegs.classList.toggle('hidden',n!=='regs');
-      if(n==='regs') loadAdv();
-      if(n==='adv') loadDraft();
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
+    /* === Tabs === */
+    function setTab(n){ saveDraft(); E.tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
+      E.tabColab.classList.toggle('hidden',n!=='colab'); E.tabAdv.classList.toggle('hidden',n!=='adv'); E.tabRegs.classList.toggle('hidden',n!=='regs');
+      if(n==='regs') loadAdv(); if(n==='adv') loadDraft(); window.scrollTo({top:0,behavior:'smooth'}); }
     document.querySelector('[data-tab="colab"]').onclick=()=>setTab('colab');
     document.querySelector('[data-tab="adv"]').onclick =()=>setTab('adv');
     document.querySelector('[data-tab="regs"]').onclick=()=>setTab('regs');
 
-    /* AUTH */
-    function setLogged(s){
-      const logged=!!s;
-      document.getElementById('user-email').textContent=logged?s.user.email:'Deslogado';
-      E.viewAuth.classList.toggle('hidden',logged);
-      E.viewApp .classList.toggle('hidden',!logged);
-      E.btnLogout.classList.toggle('hidden',!logged);
-    }
-    document.getElementById('btn-logout').onclick=async()=>{await supabaseClient.auth.signOut();};
-    document.getElementById('btn-login').onclick=async()=>{
-      const { error }=await supabaseClient.auth.signInWithPassword({email:E.email.value.trim(),password:E.password.value});
-      if(error){E.msg.textContent=error.message;E.msg.style.color='#f87171';}
-    };
-    document.getElementById('btn-signup').onclick=async()=>{
-      const { error }=await supabaseClient.auth.signUp({email:E.email.value.trim(),password:E.password.value});
-      E.msg.textContent=error?error.message:'Conta criada!'; E.msg.style.color=error?'#f87171':'#34d399';
-    };
-    document.getElementById('btn-recover').onclick=async()=>{
-      const email=E.email.value.trim(); if(!email){E.msg.textContent='Digite seu e-mail.';return;}
-      const { error }=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
-      E.msg.textContent=error?error.message:'Se existir, enviaremos o link.'; E.msg.style.color=error?'#f87171':'#34d399';
-    };
+    /* === Auth === */
+    function setLogged(s){ const logged=!!s; E.viewAuth.classList.toggle('hidden',logged); E.viewApp.classList.toggle('hidden',!logged);
+      E.btnLogout.classList.toggle('hidden',!logged); document.getElementById('user-email').textContent=logged?s.user.email:'Deslogado'; }
+    E.btnLogout.onclick=async()=>{await supabaseClient.auth.signOut();}
+    $('#btn-login').onclick=async()=>{const email=E.email.value.trim(),password=E.password.value;if(!email||!password)return msg('Preencha e-mail e senha.',true);
+      const {error}=await supabaseClient.auth.signInWithPassword({email,password}); if(error) msg(error.message,true);}
+    $('#btn-signup').onclick=async()=>{const email=E.email.value.trim(),password=E.password.value;if(!email||!password)return msg('Defina e-mail e senha.',true);
+      const {error}=await supabaseClient.auth.signUp({email,password}); msg(error?error.message:'Conta criada!',!!error)}
+    $('#btn-recover').onclick=async()=>{const email=E.email.value.trim(); if(!email)return msg('Digite seu e-mail.',true);
+      const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin}); msg(error?error.message:'Se existir, enviaremos o link.',!!error)}
+    function msg(t,err){E.msg.textContent=t;E.msg.style.color=err?'#f87171':'#34d399'}
 
-    /* COLABORADORES */
-    E.toggleColabForm.onclick=()=>E.formColab.classList.toggle('hidden');
-    E.cancelColabForm.onclick=()=>E.formColab.classList.add('hidden');
+    /* === Colaboradores === */
+    E.toggleColabForm.onclick=()=>E.formColab.classList.toggle('hidden'); E.cancelColabForm.onclick=()=>E.formColab.classList.add('hidden');
+    let colabList=[]; let advCache=[];
+    async function loadColabs(){ const {data,error}=await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
+      if(error){console.error(error);return;} colabList=data||[]; renderColabs(colabList); fillColabDatalist(); if(E.f_colab_id.value) setColabById(E.f_colab_id.value); }
+    function renderColabs(items){ E.tblColab.innerHTML=''; if(!items.length){E.colabEmpty.classList.remove('hidden');return;} E.colabEmpty.classList.add('hidden');
+      for(const c of items){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${esc(c.nome)}</td><td>${esc(c.cpf||'')}</td><td>${esc(c.ctps||'')}</td><td>${esc(c.serie||'')}</td>
+        <td><button class="icon" title="Excluir">🗑️</button></td>`; tr.querySelector('button').onclick=()=>delColab(c.id); E.tblColab.appendChild(tr);} }
+    async function delColab(id){ if(!confirm('Excluir colaborador?'))return; await supabaseClient.from('colaboradores').delete().eq('id',id); setTimeout(loadColabs,2000); }
+    function fillColabDatalist(){ const q=(E.f_search.value||'').toLowerCase(); const list=q?colabList.filter(c=>c.nome.toLowerCase().includes(q)):colabList;
+      E.f_list.innerHTML=''; for(const c of list){ const o=document.createElement('option'); o.value=c.nome; E.f_list.appendChild(o);} }
+    function setColabById(id){ const c=colabList.find(x=>String(x.id)===String(id)); if(!c){E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';return;}
+      E.f_colab_id.value=c.id; E.f_search.value=c.nome; E.f_cpf.value=c.cpf||''; E.f_ctps.value=c.ctps||''; E.f_serie.value=c.serie||''; saveDraft(); }
+    function resolveColab(){ const name=(E.f_search.value||'').trim().toLowerCase(); if(!name){E.f_colab_id.value='';E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';saveDraft();return;}
+      const ex=colabList.find(c=>c.nome.toLowerCase()===name)||colabList.find(c=>c.nome.toLowerCase().startsWith(name))||colabList.find(c=>c.nome.toLowerCase().includes(name));
+      if(ex) setColabById(ex.id); }
+    E.f_search.addEventListener('input',fillColabDatalist); E.f_search.addEventListener('change',resolveColab); E.f_search.addEventListener('blur',resolveColab);
+    E.formColab.onsubmit=async(e)=>{e.preventDefault(); const p={nome:E.c_nome.value.trim(),cpf:E.c_cpf.value.trim()||null,ctps:E.c_ctps.value.trim()||null,serie:E.c_serie.value.trim()||null};
+      if(!p.nome)return; const {data,error}=await supabaseClient.from('colaboradores').insert(p).select().single(); if(error)return alert('Erro: '+error.message);
+      e.target.reset(); E.formColab.classList.add('hidden'); await loadColabs(); if(data?.id) setColabById(data.id); };
 
-    let colabList=[];  // [{id,nome,cpf,ctps,serie}]
-    let advCache=[];   // adv_view cache para filtro/agrupamento
-
-    async function loadColabs(){
-      const { data,error }=await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
-      if(error){console.error(error);return;}
-      colabList=data||[];
-      renderColabs(colabList);
-      fillColabDatalist();
-      // se rascunho tiver id, sincroniza
-      if(E.f_colab_id.value) setColabById(E.f_colab_id.value);
-    }
-    function renderColabs(items){
-      E.tblColab.innerHTML='';
-      if(!items.length){E.colabEmpty.classList.remove('hidden');return;}
-      E.colabEmpty.classList.add('hidden');
-      for(const c of items){
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${esc(c.nome)}</td><td>${esc(c.cpf||'')}</td><td>${esc(c.ctps||'')}</td><td>${esc(c.serie||'')}</td>
-        <td><button class="icon" title="Excluir">🗑️</button></td>`;
-        tr.querySelector('button').onclick=()=>delColab(c.id);
-        E.tblColab.appendChild(tr);
-      }
-    }
-    function fillColabDatalist(){
-      const q=(E.f_search.value||'').toLowerCase();
-      const list=q?colabList.filter(c=>c.nome.toLowerCase().includes(q)):colabList;
-      E.f_list.innerHTML='';
-      for(const c of list){
-        const o=document.createElement('option'); o.value=c.nome; E.f_list.appendChild(o);
-      }
-    }
-    function setColabById(id){
-      const c=colabList.find(x=>String(x.id)===String(id));
-      if(!c){E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';return;}
-      E.f_colab_id.value=c.id;
-      E.f_search.value=c.nome;
-      E.f_cpf.value=c.cpf||''; E.f_ctps.value=c.ctps||''; E.f_serie.value=c.serie||'';
-      saveDraft();
-    }
-    function resolveColabFromSearch(){
-      const name=(E.f_search.value||'').trim().toLowerCase();
-      if(!name){E.f_colab_id.value='';E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';saveDraft();return;}
-      // 1º exato, 2º começa com, 3º contém
-      const ex=colabList.find(c=>c.nome.toLowerCase()===name)
-           || colabList.find(c=>c.nome.toLowerCase().startsWith(name))
-           || colabList.find(c=>c.nome.toLowerCase().includes(name));
-      if(ex) setColabById(ex.id);
-    }
-    E.f_search.addEventListener('input', fillColabDatalist);
-    E.f_search.addEventListener('change', resolveColabFromSearch);
-    E.f_search.addEventListener('blur', resolveColabFromSearch);
-
-    E.formColab.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const payload={nome:E.c_nome.value.trim(),cpf:E.c_cpf.value.trim()||null,ctps:E.c_ctps.value.trim()||null,serie:E.c_serie.value.trim()||null};
-      if(!payload.nome) return;
-      const { data,error }=await supabaseClient.from('colaboradores').insert(payload).select().single();
-      if(error){alert('Erro ao salvar colaborador: '+error.message);return;}
-      e.target.reset(); E.formColab.classList.add('hidden');
-      await loadColabs();
-      if(data?.id) setColabById(data.id);
-    });
-    async function delColab(id){
-      if(!confirm('Excluir colaborador?'))return;
-      await supabaseClient.from('colaboradores').delete().eq('id',id);
-      setTimeout(loadColabs,2000);
-    }
-
-    /* REGISTROS AGRUPADOS */
-    async function loadAdv(){
-      const { data,error }=await supabaseClient.from('adv_registros_view').select('*');
-      if(error){console.error(error);return;}
-      advCache=(data||[]).slice().sort((a,b)=>(a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
-      renderGrouped(advCache);
-    }
-    function renderGrouped(items){
-      E.grpContainer.innerHTML='';
-      if(!items.length){E.empty.classList.remove('hidden');return;}
-      E.empty.classList.add('hidden');
-
-      // group by colaborador_nome
-      const map=new Map();
-      for(const r of items){
-        const k=r.colaborador_nome||r.colaborador||'—';
-        if(!map.has(k)) map.set(k,[]);
-        map.get(k).push(r);
-      }
-      for(const [nome,arr] of map){
-        const grp=document.createElement('div'); grp.className='grp';
+    /* === Registros agrupados === */
+    async function loadAdv(){ const {data,error}=await supabaseClient.from('adv_registros_view').select('*');
+      if(error){console.error(error);return;} advCache=(data||[]).slice().sort((a,b)=>(a.colaborador_nome||'').localeCompare(b.colaborador_nome||'')); renderGrouped(advCache); }
+    function renderGrouped(items){ E.grpContainer.innerHTML=''; if(!items.length){E.empty.classList.remove('hidden');return;} E.empty.classList.add('hidden');
+      const map=new Map(); for(const r of items){const k=r.colaborador_nome||r.colaborador||'—'; if(!map.has(k)) map.set(k,[]); map.get(k).push(r);}
+      for(const [nome,arr] of map){ const grp=document.createElement('div'); grp.className='grp';
         const head=document.createElement('div'); head.className='grp-h';
-        const left=document.createElement('div'); left.innerHTML=`<strong>${esc(nome)}</strong> <small class="muted">• ${arr[0].colaborador_cpf||'—'} • CTPS ${arr[0].colaborador_ctps||'—'} • Série ${arr[0].colaborador_serie||'—'}</small>`;
-        const right=document.createElement('div'); right.innerHTML=`<span class="pill">${arr.length}</span>`;
-        head.append(left,right); grp.appendChild(head);
-
+        head.innerHTML=`<div><strong>${esc(nome)}</strong> <small class="muted">• ${esc(arr[0].colaborador_cpf||'—')} • CTPS ${esc(arr[0].colaborador_ctps||'—')} • Série ${esc(arr[0].colaborador_serie||'—')}</small></div><div><span class="pill">${arr.length}</span></div>`;
         const body=document.createElement('div'); body.className='grp-b';
-        const table=document.createElement('table'); table.style.marginTop='10px';
-        table.innerHTML=`<thead><tr><th>Ocorrência</th><th>Aplicação</th><th>Tipo</th><th>Anexo</th><th>Ações</th></tr></thead>`;
+        const table=document.createElement('table'); table.style.marginTop='10px'; table.innerHTML=`<thead><tr><th>Ocorrência</th><th>Aplicação</th><th>Tipo</th><th>Anexo</th><th>Ações</th></tr></thead>`;
         const tb=document.createElement('tbody');
-        for(const r of arr){
-          const tr=document.createElement('tr');
+        for(const r of arr){ const tr=document.createElement('tr');
           const tdo=document.createElement('td'); tdo.textContent=r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
           const tda=document.createElement('td'); tda.textContent=r.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
-          const ttt=document.createElement('td'); ttt.textContent=r.tipo||'—';
-          const tan=document.createElement('td');
-          if(r.arquivo_path){
-            const { data:pub }=supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
-            const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent='baixar';
-            tan.appendChild(a);
-          }else tan.textContent='—';
-          const tac=document.createElement('td');
-          const wrap=document.createElement('div'); wrap.className='actions-inline';
-          const ed=document.createElement('button'); ed.className='icon'; ed.title='Editar'; ed.textContent='✏️';
-          const ex=document.createElement('button'); ex.className='icon'; ex.title='Excluir'; ex.textContent='🗑️';
-          ed.onclick=()=>startEdit(r);
-          ex.onclick=()=>delAdv(r.id,r.arquivo_path);
-          wrap.append(ed,ex); tac.appendChild(wrap);
-          tr.append(tdo,tda,ttt,tan,tac); tb.appendChild(tr);
-        }
-        table.appendChild(tb); body.appendChild(table); grp.appendChild(body);
-        head.onclick=()=>grp.classList.toggle('open');
-        E.grpContainer.appendChild(grp);
-      }
+          const ttt=document.createElement('td'); const subt=r.verbal_motivo||null; ttt.textContent=r.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
+          const tan=document.createElement('td'); if(r.arquivo_path){const {data:pub}=supabaseClient.storage.from('adv_docs').getPublicUrl(r.arquivo_path);
+            const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent='baixar'; tan.appendChild(a);} else tan.textContent='—';
+          const tac=document.createElement('td'); const wrap=document.createElement('div'); wrap.className='actions-inline';
+            const ed=document.createElement('button'); ed.className='icon'; ed.title='Editar'; ed.textContent='✏️'; ed.onclick=()=>startEdit(r);
+            const ex=document.createElement('button'); ex.className='icon'; ex.title='Excluir'; ex.textContent='🗑️'; ex.onclick=()=>delAdv(r.id,r.arquivo_path);
+            wrap.append(ed,ex); tac.appendChild(wrap);
+          tr.append(tdo,tda,ttt,tan,tac); tb.appendChild(tr); }
+        table.appendChild(tb); body.appendChild(table); grp.appendChild(head); grp.appendChild(body); head.onclick=()=>grp.classList.toggle('open'); E.grpContainer.appendChild(grp); }
     }
+    E.filter.oninput=()=>{const f=E.filter.value.toLowerCase().trim();
+      const filtered=advCache.filter(x=> (x.colaborador_nome||x.colaborador||'').toLowerCase().includes(f) || (x.colaborador_cpf||'').toLowerCase().includes(f) || (x.colaborador_ctps||'').toLowerCase().includes(f) );
+      renderGrouped(filtered); };
+    async function delAdv(id,path){ if(!confirm('Excluir registro?'))return; await supabaseClient.from('adv_registros').delete().eq('id',id); if(path) await supabaseClient.storage.from(BUCKET).remove([path]); setTimeout(loadAdv,2000); }
 
-    E.filter.addEventListener('input',()=>{
-      const f=E.filter.value.toLowerCase().trim();
-      const filtered=advCache.filter(x=>{
-        const n=(x.colaborador_nome||x.colaborador||'').toLowerCase();
-        const cpf=(x.colaborador_cpf||'').toLowerCase();
-        const ctps=(x.colaborador_ctps||'').toLowerCase();
-        return n.includes(f)||cpf.includes(f)||ctps.includes(f);
-      });
-      renderGrouped(filtered);
-    });
+    /* === Advertência (cadastro/edição) === */
+    function effectiveTipo(){ return E.f_tipo.value; } // sempre o valor puro
+    function toggleVerbal(){ E.f_verbal_grp.style.display=(E.f_tipo.value==='Verbal')?'block':'none'; }
+    E.f_tipo.onchange=()=>{ toggleVerbal(); saveDraft(); }
+    E.f_verbal_sub.onchange=saveDraft;
 
-    async function delAdv(id,path){
-      if(!confirm('Excluir registro?'))return;
-      await supabaseClient.from('adv_registros').delete().eq('id',id);
-      if(path) await supabaseClient.storage.from(BUCKET).remove([path]);
-      setTimeout(loadAdv,2000);
-    }
+    function saveDraft(){ localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      colaborador_id:E.f_colab_id.value||'', colaborador_busca:E.f_search.value||'',
+      data_ocorrencia:E.f_oc.value||'', data_aplicacao:E.f_ap.value||'',
+      tipo:E.f_tipo.value||'Verbal', verbal_sub:E.f_verbal_sub.value||'Atraso'
+    })); }
+    function loadDraft(){ const raw=localStorage.getItem(DRAFT_KEY); if(!raw) return; try{ const d=JSON.parse(raw);
+      if(d.colaborador_busca!==undefined) E.f_search.value=d.colaborador_busca; if(d.colaborador_id){E.f_colab_id.value=d.colaborador_id; setColabById(d.colaborador_id);} else resolveColab();
+      if(d.data_ocorrencia)E.f_oc.value=d.data_ocorrencia; if(d.data_aplicacao)E.f_ap.value=d.data_aplicacao;
+      if(d.tipo){E.f_tipo.value=d.tipo; toggleVerbal();} if(d.verbal_sub)E.f_verbal_sub.value=d.verbal_sub; }catch{} }
+    ;[E.f_search,E.f_oc,E.f_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input',saveDraft));
 
-    /* ADVERTÊNCIA (cadastro/edição) */
-    function effectiveTipo(){return E.f_tipo.value==='Verbal'?`Verbal (${E.f_verbal_sub.value})`:E.f_tipo.value;}
-    function toggleVerbal(){E.f_verbal_grp.style.display=(E.f_tipo.value==='Verbal')?'block':'none';}
-    E.f_tipo.addEventListener('change',()=>{toggleVerbal();saveDraft();});
-    E.f_verbal_sub.addEventListener('change',saveDraft);
+    function resetForm(){ E.f_edit.value=''; localStorage.removeItem(EDIT_KEY);
+      const today=new Date().toISOString().slice(0,10); E.f_search.value=''; E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
+      E.f_oc.value=today; E.f_ap.value=today; E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Atraso'; E.f_file.value=''; toggleVerbal(); saveDraft(); }
+    E.btnNew.onclick=()=>{resetForm(); setTab('adv');}; E.btnClear.onclick=()=>resetForm();
 
-    function saveDraft(){
-      localStorage.setItem(''+DRAFT_KEY,JSON.stringify({
-        colaborador_id:E.f_colab_id.value||'',
-        colaborador_busca:E.f_search.value||'',
-        data_ocorrencia:E.f_oc.value||'',
-        data_aplicacao:E.f_ap.value||'',
-        tipo:E.f_tipo.value||'Verbal',
-        verbal_sub:E.f_verbal_sub.value||'Atraso',
-      }));
-    }
-    function loadDraft(){
-      const raw=localStorage.getItem(''+DRAFT_KEY); if(!raw) return;
-      try{
-        const d=JSON.parse(raw);
-        if(d.colaborador_busca!==undefined) E.f_search.value=d.colaborador_busca;
-        if(d.colaborador_id){E.f_colab_id.value=d.colaborador_id; setColabById(d.colaborador_id);} else resolveColabFromSearch();
-        if(d.data_ocorrencia)E.f_oc.value=d.data_ocorrencia;
-        if(d.data_aplicacao)E.f_ap.value=d.data_aplicacao;
-        if(d.tipo){E.f_tipo.value=d.tipo; toggleVerbal();}
-        if(d.verbal_sub)E.f_verbal_sub.value=d.verbal_sub;
-      }catch{}
-    }
-    [E.f_search,E.f_oc,E.f_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input',saveDraft));
+    function startEdit(r){ setTab('adv'); E.f_edit.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
+      if(r.colaborador_id) setColabById(r.colaborador_id); else {E.f_search.value=r.colaborador_nome||''; resolveColab();}
+      E.f_oc.value=r.data_ocorrencia?.substring(0,10)||''; E.f_ap.value=r.data_aplicacao?.substring(0,10)||'';
+      if(r.tipo==='Verbal'){E.f_tipo.value='Verbal'; E.f_verbal_sub.value=r.verbal_motivo||'Atraso';} else {E.f_tipo.value=r.tipo||'Verbal';}
+      toggleVerbal(); saveDraft(); }
 
-    function resetForm(){
-      E.f_edit.value=''; localStorage.removeItem(EDIT_KEY);
-      const today=new Date().toISOString().slice(0,10);
-      E.f_search.value=''; E.f_colab_id.value='';
-      E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
-      E.f_oc.value=today; E.f_ap.value=today;
-      E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Atraso'; E.f_file.value='';
-      toggleVerbal(); saveDraft();
-    }
-    E.btnNew.onclick=()=>{resetForm(); setTab('adv');};
-    E.btnClear.onclick=()=>resetForm();
-
-    function startEdit(r){
-      setTab('adv');
-      E.f_edit.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
-      if(r.colaborador_id) setColabById(r.colaborador_id); else {E.f_search.value=r.colaborador_nome||''; resolveColabFromSearch();}
-      E.f_oc.value=r.data_ocorrencia?.substring(0,10)||'';
-      E.f_ap.value=r.data_aplicacao?.substring(0,10)||'';
-      const m=/^Verbal\s*\((.+)\)$/.exec(r.tipo||'');
-      if(m){E.f_tipo.value='Verbal';E.f_verbal_sub.value=m[1];} else {E.f_tipo.value=r.tipo||'Verbal';}
-      toggleVerbal(); saveDraft();
-    }
-
-    E.formAdv.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      // garante que temos id mesmo se o usuário só digitou e clicou salvar
-      if(!E.f_colab_id.value) resolveColabFromSearch();
-      if(!E.f_colab_id.value) { alert('Selecione um colaborador válido.'); return; }
-
+    E.formAdv.onsubmit=async(e)=>{ e.preventDefault(); if(!E.f_colab_id.value) resolveColab(); if(!E.f_colab_id.value) return alert('Selecione um colaborador válido.');
       const nome=E.f_search.value || (colabList.find(c=>String(c.id)===String(E.f_colab_id.value))?.nome) || null;
-      const payload={
-        colaborador_id:E.f_colab_id.value,
-        colaborador:nome,
-        data_ocorrencia:E.f_oc.value,
-        data_aplicacao:E.f_ap.value,
-        tipo:effectiveTipo()
-      };
+      const payload={ colaborador_id:E.f_colab_id.value, colaborador:nome, data_ocorrencia:E.f_oc.value, data_aplicacao:E.f_ap.value, tipo:effectiveTipo() };
+      if(E.f_tipo.value==='Verbal') payload.verbal_motivo = E.f_verbal_sub.value; else payload.verbal_motivo = null;
+      const file=E.f_file.files[0]; if(file){ const ext=(file.name.split('.').pop()||'').toLowerCase(); if(!['png','pdf'].includes(ext)) return alert('Envie PNG ou PDF.');
+        const path=`${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`; const {error:upErr}=await supabaseClient.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false}); if(upErr) return alert('Falha no upload: '+upErr.message);
+        payload.arquivo_path=path; }
+      const editingId=E.f_edit.value||localStorage.getItem(EDIT_KEY)||''; if(editingId){ const {error}=await supabaseClient.from('adv_registros').update(payload).eq('id',editingId);
+        if(error) return alert('Erro ao atualizar: '+error.message); } else { const {error}=await supabaseClient.from('adv_registros').insert(payload); if(error) return alert('Erro ao salvar: '+error.message); }
+      setTab('regs'); await loadAdv(); resetForm();
+    };
 
-      // upload opcional
-      const file=E.f_file.files[0];
-      if(file){
-        const ext=(file.name.split('.').pop()||'').toLowerCase();
-        if(!['png','pdf'].includes(ext)) return alert('Envie PNG ou PDF.');
-        const path=`${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
-        const { error:upErr }=await supabaseClient.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
-        if(upErr) return alert('Falha no upload: '+upErr.message);
-        payload.arquivo_path=path;
-      }
-
-      const editingId=E.f_edit.value||localStorage.getItem(EDIT_KEY)||'';
-      if(editingId){
-        const { error }=await supabaseClient.from('adv_registros').update(payload).eq('id',editingId);
-        if(error) return alert('Erro ao atualizar: '+error.message);
-      }else{
-        const { error }=await supabaseClient.from('adv_registros').insert(payload);
-        if(error) return alert('Erro ao salvar: '+error.message);
-      }
-
-      // vai para registros agrupados e recarrega
-      setTab('regs'); await loadAdv();
-      resetForm();
-    });
-
-    /* UTILS & INIT */
-    function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
-    let rt=false;
-    async function bindRt(){
-      if(rt) return; rt=true;
-      supabaseClient.channel('colabs-rt').on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},()=>{loadColabs();setTimeout(loadColabs,2000);}).subscribe();
-      supabaseClient.channel('adv-rt').on('postgres_changes',{event:'*',schema:'public',table:'adv_registros'},()=>{loadAdv();setTimeout(loadAdv,2000);}).subscribe();
-    }
-    (async function init(){
-      const { data:{ session } }=await supabaseClient.auth.getSession();
-      setLogged(session);
-      const today=new Date().toISOString().slice(0,10);
-      E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
-
+    /* === Init + realtime === */
+    (async function init(){ const {data:{session}}=await supabaseClient.auth.getSession(); setLogged(session);
+      const today=new Date().toISOString().slice(0,10); E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
       if(session){ setTab('colab'); await loadColabs(); await loadAdv(); bindRt(); loadDraft(); }
-      supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); }});
-    })();
+      supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); } }); })();
+    function bindRt(){ supabaseClient.channel('colabs-rt').on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},()=>{loadColabs();setTimeout(loadColabs,2000);}).subscribe();
+      supabaseClient.channel('adv-rt').on('postgres_changes',{event:'*',schema:'public',table:'adv_registros'},()=>{loadAdv();setTimeout(loadAdv,2000);}).subscribe(); }
   </script>
 </body>
 </html>
