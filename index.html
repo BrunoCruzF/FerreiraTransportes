@@ -107,6 +107,14 @@
     @media (max-width: 480px){
       .grid-4, .grid-3{grid-template-columns:1fr}
     }
+
+    /* Ícones-botão */
+    .icon{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:36px; height:36px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; cursor:pointer; font-size:18px;
+    }
+    .icon[title]{ position:relative }
   </style>
 </head>
 <body>
@@ -186,10 +194,20 @@
       <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
     </section>
 
-    <!-- ADVERTÊNCIAS (apenas cadastro) -->
+    <!-- ADVERTÊNCIAS (apenas cadastro/edição) -->
     <section id="tab-adv" class="card hidden">
-      <h2 style="margin-top:0">Cadastrar Advertência</h2>
+      <div class="row" style="justify-content:space-between; align-items:center;">
+        <h2 style="margin:0">Cadastrar Advertência</h2>
+        <!-- Ações rápidas: novo (🆕) limpar (🧹) -->
+        <div>
+          <button id="btn-new-adv" class="icon" title="Nova advertência">🆕</button>
+          <button id="btn-clear-adv" class="icon" title="Limpar formulário">🧹</button>
+        </div>
+      </div>
+
       <form id="form-adv" class="grid-4">
+        <input type="hidden" id="f_editing_id" />
+
         <label>Colaborador
           <select id="f_colaborador_id" required class="field"></select>
         </label>
@@ -209,6 +227,7 @@
         <label>Data da aplicação
           <input type="date" id="f_data_aplicacao" required class="field" />
         </label>
+
         <label>Tipo de advertência
           <select id="f_tipo" required class="field">
             <option>Verbal</option>
@@ -216,20 +235,35 @@
             <option>Atraso</option>
           </select>
         </label>
-        <div></div>
+
+        <!-- Subtipo para quando for Verbal -->
+        <label id="grp_verbal" class="">
+          Subtipo (quando Verbal)
+          <select id="f_verbal_sub" class="field">
+            <option>Atraso</option>
+            <option>Falta não justificada</option>
+          </select>
+        </label>
 
         <label style="grid-column:1/-1">Anexo (PNG ou PDF)
           <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" class="field" />
         </label>
+
         <div class="row" style="grid-column:1/-1">
-          <button class="primary" type="submit">Salvar</button>
+          <button class="primary" type="submit" title="Salvar (inserir ou atualizar)">💾 Salvar</button>
         </div>
       </form>
+      <p class="muted" id="adv-hint" style="margin-top:8px">Dica: ao trocar de aba, o rascunho do formulário permanece salvo automaticamente.</p>
     </section>
 
     <!-- REGISTROS (nova aba) -->
     <section id="tab-regs" class="card hidden">
-      <h2 style="margin-top:0">Registros de Advertência</h2>
+      <div class="row" style="justify-content:space-between; align-items:center;">
+        <h2 style="margin:0">Registros de Advertência</h2>
+        <!-- Filtro -->
+        <input id="filter" class="field" style="max-width:360px" placeholder="Filtrar por colaborador, CPF ou CTPS" />
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -240,7 +274,7 @@
             <th>Ocorrência</th>
             <th>Aplicação</th>
             <th>Tipo</th>
-            <th style="width:1%"></th>
+            <th style="width:1%">Ações</th>
           </tr>
         </thead>
         <tbody id="tbl-reg"></tbody>
@@ -254,13 +288,16 @@
   <!-- Supabase UMD -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
   <script>
-    // ======= CONFIG =======
-    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co"; // TROQUE
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";            // TROQUE
+    /*************** CONFIG ***************/
+    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co";   // seu projeto
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
     const BUCKET = 'adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ======= ELEMENTOS =======
+    const DRAFT_KEY = 'adv_form_draft_v1';
+    const EDIT_KEY  = 'adv_edit_id_v1';
+
+    /*************** ELEMENTOS ***************/
     const E = {
       // auth
       viewAuth: document.getElementById('view-auth'),
@@ -293,20 +330,26 @@
       colabEmpty: document.getElementById('colab-empty'),
       // adv
       formAdv: document.getElementById('form-adv'),
+      f_editing_id: document.getElementById('f_editing_id'),
       f_colab_id: document.getElementById('f_colaborador_id'),
       f_cpf: document.getElementById('f_cpf'),
       f_ctps: document.getElementById('f_ctps'),
       f_serie: document.getElementById('f_serie'),
-      f_data_ocorrencia: document.getElementById('f_data_ocorrencia'),
-      f_data_aplicacao: document.getElementById('f_data_aplicacao'),
+      f_data_oc: document.getElementById('f_data_ocorrencia'),
+      f_data_ap: document.getElementById('f_data_aplicacao'),
       f_tipo: document.getElementById('f_tipo'),
-      f_arquivo: document.getElementById('f_arquivo'),
+      f_verbal_grp: document.getElementById('grp_verbal'),
+      f_verbal_sub: document.getElementById('f_verbal_sub'),
+      f_file: document.getElementById('f_arquivo'),
+      btnNewAdv: document.getElementById('btn-new-adv'),
+      btnClearAdv: document.getElementById('btn-clear-adv'),
       // regs
+      filter: document.getElementById('filter'),
       tblReg: document.getElementById('tbl-reg'),
       empty: document.getElementById('empty'),
     };
 
-    // ======= THEME =======
+    /*************** THEME ***************/
     const THEME_KEY = 'ft_theme';
     function applyTheme(theme){
       if(theme) document.body.setAttribute('data-theme', theme);
@@ -325,59 +368,58 @@
     applyTheme(localStorage.getItem(THEME_KEY));
     E.btnTheme.addEventListener('click', toggleTheme);
 
-    // ======= TABS =======
+    /*************** TABS ***************/
     function setTab(name){
       E.tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
       E.tabColab.classList.toggle('hidden', name !== 'colab');
-      E.tabAdv.classList.toggle('hidden', name !== 'adv');
+      E.tabAdv .classList.toggle('hidden', name !== 'adv');
       E.tabRegs.classList.toggle('hidden', name !== 'regs');
+      // ao trocar de aba, preservamos/gravamos rascunho, então nada é perdido
+      if(name === 'regs') loadAdv(); // sempre que abrir registros, recarrega
     }
-    // rótulos dos botões
     document.querySelector('[data-tab="colab"]').addEventListener('click', ()=>setTab('colab'));
     document.querySelector('[data-tab="adv"]').addEventListener('click', ()=>setTab('adv'));
-    document.querySelector('[data-tab="regs"]').addEventListener('click', ()=>{ setTab('regs'); loadAdv(); });
-
-    // logo → vai para Colaboradores
+    document.querySelector('[data-tab="regs"]').addEventListener('click', ()=>setTab('regs'));
     E.homeLink.addEventListener('click', (ev)=>{ ev.preventDefault(); setTab('colab'); window.scrollTo({top:0,behavior:'smooth'}); });
 
-    // ======= AUTH =======
+    /*************** AUTH ***************/
     function setErr(t){ E.msg.textContent = t; E.msg.style.color = '#f87171'; }
     function setOk(t){ E.msg.textContent = t; E.msg.style.color = '#34d399'; }
     function setLogged(session){
       const logged = !!session;
-      E.viewAuth.classList.toggle('hidden', logged);
-      E.viewApp.classList.toggle('hidden', !logged);
-      E.btnLogout.classList.toggle('hidden', !logged);
       document.getElementById('user-email').textContent = logged ? session.user.email : 'Deslogado';
+      E.viewAuth.classList.toggle('hidden', logged);
+      E.viewApp .classList.toggle('hidden', !logged);
+      E.btnLogout.classList.toggle('hidden', !logged);
     }
-    document.getElementById('btn-logout').addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); });
-
-    document.getElementById('btn-login').addEventListener('click', async ()=>{
-      const email = E.email.value.trim(), password = E.password.value;
+    E.btnLogout.addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); });
+    E.btnLogin.addEventListener('click', async ()=>{
+      const email=E.email.value.trim(), password=E.password.value;
       if(!email||!password) return setErr('Preencha e-mail e senha.');
       const { error } = await supabaseClient.auth.signInWithPassword({ email,password });
       if(error) return setErr(error.message);
     });
-    document.getElementById('btn-signup').addEventListener('click', async ()=>{
-      const email = E.email.value.trim(), password = E.password.value;
+    E.btnSignup.addEventListener('click', async ()=>{
+      const email=E.email.value.trim(), password=E.password.value;
       if(!email||!password) return setErr('Defina um e-mail e uma senha.');
       const { error } = await supabaseClient.auth.signUp({ email,password });
       if(error) return setErr(error.message);
       setOk('Conta criada! (confirmação desativada).');
     });
-    document.getElementById('btn-recover').addEventListener('click', async ()=>{
-      const email = E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
+    E.btnRecover.addEventListener('click', async ()=>{
+      const email=E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
       if(error) return setErr(error.message);
       setOk('Se existir, enviaremos um link de redefinição.');
     });
 
-    // ======= COLABORADORES =======
+    /*************** COLABORADORES ***************/
     E.toggleColabForm.addEventListener('click', ()=>E.formColab.classList.toggle('hidden'));
     E.cancelColabForm.addEventListener('click', ()=>E.formColab.classList.add('hidden'));
 
     async function loadColabs(){
-      const { data, error } = await supabaseClient.from('colaboradores').select('*').order('created_at',{ascending:false});
+      // ordena alfabeticamente no servidor (garante consistência)
+      const { data, error } = await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
       if(error){ console.error(error); return; }
       renderColabs(data||[]);
       fillColabSelect(data||[]);
@@ -393,7 +435,9 @@
           <td>${escapeHtml(c.cpf||'')}</td>
           <td>${escapeHtml(c.ctps||'')}</td>
           <td>${escapeHtml(c.serie||'')}</td>
-          <td><button class="danger" data-id="${c.id}">Excluir</button></td>`;
+          <td>
+            <button class="icon" title="Excluir" aria-label="Excluir">🗑️</button>
+          </td>`;
         tr.querySelector('button').addEventListener('click', ()=>delColab(c.id));
         E.tblColab.appendChild(tr);
       }
@@ -422,6 +466,7 @@
       E.f_cpf.value = opt.dataset.cpf || '';
       E.f_ctps.value = opt.dataset.ctps || '';
       E.f_serie.value = opt.dataset.serie || '';
+      saveDraft(); // atualiza rascunho
     }
     E.f_colab_id.addEventListener('change', syncColabInfo);
 
@@ -448,17 +493,21 @@
     async function delColab(id){
       if(!confirm('Excluir colaborador? (isso não apaga registros antigos)')) return;
       await supabaseClient.from('colaboradores').delete().eq('id', id);
+      // fallback de 2s garante tela atualizada
+      setTimeout(loadColabs, 2000);
     }
 
-    // ======= REGISTROS =======
+    /*************** REGISTROS ***************/
+    let advCache = []; // mantém em memória para filtro
     async function loadAdv(){
-      const { data, error } = await supabaseClient
-        .from('adv_registros_view')
-        .select('*')
-        .order('data_ocorrencia',{ascending:false});
+      // preferência: ordenar alfabeticamente no servidor
+      let query = supabaseClient.from('adv_registros_view').select('*').order('colaborador_nome',{ascending:true});
+      const { data, error } = await query;
       if(error){ console.error(error); return; }
-      renderAdv(data||[]);
+      advCache = (data||[]).slice().sort((a,b)=> (a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
+      renderAdv(advCache);
     }
+
     function renderAdv(items){
       E.tblReg.innerHTML = '';
       if(!items.length){ E.empty.classList.remove('hidden'); return; }
@@ -485,88 +534,203 @@
         const tdAp = document.createElement('td');    tdAp.textContent = r.data_aplicacao ? new Date(r.data_aplicacao).toLocaleDateString() : '—';
         const tdTp = document.createElement('td');    tdTp.textContent = r.tipo || '—';
 
-        const tdDel = document.createElement('td');
-        const bt = document.createElement('button'); bt.className = 'danger'; bt.textContent = 'Excluir';
-        bt.addEventListener('click', ()=>delAdv(r.id, r.arquivo_path));
-        tdDel.appendChild(bt);
+        const tdAcoes = document.createElement('td');
+        const btnEdit = document.createElement('button'); btnEdit.className='icon'; btnEdit.title='Editar'; btnEdit.textContent='✏️';
+        const btnDel  = document.createElement('button'); btnDel.className ='icon'; btnDel.title ='Excluir'; btnDel.textContent='🗑️';
+        btnEdit.addEventListener('click', ()=>startEdit(r));
+        btnDel .addEventListener('click', ()=>delAdv(r.id, r.arquivo_path));
+        tdAcoes.append(btnEdit, btnDel);
 
-        tr.append(tdNome,tdCpf,tdCtps,tdSerie,tdOc,tdAp,tdTp,tdDel);
+        tr.append(tdNome,tdCpf,tdCtps,tdSerie,tdOc,tdAp,tdTp,tdAcoes);
         E.tblReg.appendChild(tr);
       }
     }
+
+    // filtro dinâmico
+    E.filter.addEventListener('input', ()=>{
+      const f = E.filter.value.toLowerCase().trim();
+      const flt = advCache.filter(x=>{
+        const n=(x.colaborador_nome||x.colaborador||'').toLowerCase();
+        const cpf=(x.colaborador_cpf||'').toLowerCase();
+        const ctps=(x.colaborador_ctps||'').toLowerCase();
+        return n.includes(f) || cpf.includes(f) || ctps.includes(f);
+      });
+      renderAdv(flt);
+    });
+
     async function delAdv(id, arquivo_path){
       if(!confirm('Excluir este registro?')) return;
       await supabaseClient.from('adv_registros').delete().eq('id', id);
       if(arquivo_path){ await supabaseClient.storage.from(BUCKET).remove([arquivo_path]); }
+      // fallback de 2s (além do realtime)
+      setTimeout(loadAdv, 2000);
     }
 
-    // ======= ADVERTÊNCIA (cadastro → ir para REGISTROS) =======
+    /*************** CADASTRO/EDIÇÃO DE ADVERTÊNCIA ***************/
+    function effectiveTipo(){
+      const t = E.f_tipo.value;
+      if(t === 'Verbal') return `Verbal (${E.f_verbal_sub.value})`;
+      return t;
+    }
+    function toggleVerbal(){
+      E.f_verbal_grp.style.display = (E.f_tipo.value === 'Verbal') ? 'block' : 'none';
+    }
+    E.f_tipo.addEventListener('change', ()=>{ toggleVerbal(); saveDraft(); });
+    E.f_verbal_sub.addEventListener('change', saveDraft);
+
+    // Salva rascunho (mantém ao trocar de tela)
+    function saveDraft(){
+      const draft = {
+        colaborador_id: E.f_colab_id.value || '',
+        data_ocorrencia: E.f_data_oc.value || '',
+        data_aplicacao:  E.f_data_ap.value || '',
+        tipo: E.f_tipo.value || 'Verbal',
+        verbal_sub: E.f_verbal_sub.value || 'Atraso',
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    }
+    function loadDraft(){
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if(!raw) return;
+      try{
+        const d = JSON.parse(raw);
+        if(d.colaborador_id) E.f_colab_id.value = d.colaborador_id;
+        if(d.data_ocorrencia) E.f_data_oc.value = d.data_ocorrencia;
+        if(d.data_aplicacao)  E.f_data_ap.value = d.data_aplicacao;
+        if(d.tipo) E.f_tipo.value = d.tipo;
+        if(d.verbal_sub) E.f_verbal_sub.value = d.verbal_sub;
+        toggleVerbal(); syncColabInfo();
+      }catch{}
+    }
+    // Observa mudanças para manter rascunho
+    [E.f_colab_id,E.f_data_oc,E.f_data_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input', saveDraft));
+
+    // Novo / Limpar
+    function resetForm(keepDraft=false){
+      E.f_editing_id.value = '';
+      if(!keepDraft){
+        localStorage.removeItem(EDIT_KEY);
+        localStorage.removeItem(DRAFT_KEY);
+      }
+      const today = new Date().toISOString().slice(0,10);
+      E.f_data_oc.value = today; E.f_data_ap.value = today;
+      E.f_tipo.value = 'Verbal'; E.f_verbal_sub.value = 'Atraso';
+      E.f_file.value = '';
+      toggleVerbal(); saveDraft();
+    }
+    document.getElementById('btn-new-adv').addEventListener('click', ()=>{ resetForm(false); setTab('adv'); });
+    document.getElementById('btn-clear-adv').addEventListener('click', ()=>resetForm(false));
+
+    // Começar edição a partir da listagem
+    function startEdit(r){
+      setTab('adv');
+      E.f_editing_id.value = r.id;
+      localStorage.setItem(EDIT_KEY, r.id);
+      // Preenche
+      if(r.colaborador_id){ E.f_colab_id.value = r.colaborador_id; }
+      E.f_data_oc.value = r.data_ocorrencia?.substring(0,10) || '';
+      E.f_data_ap.value = r.data_aplicacao?.substring(0,10) || '';
+      // tipo pode vir "Verbal (Atraso)" -> separa
+      const m = /^Verbal\s*\((.+)\)$/.exec(r.tipo||'');
+      if(m){ E.f_tipo.value='Verbal'; E.f_verbal_sub.value = m[1]; }
+      else { E.f_tipo.value = r.tipo || 'Verbal'; }
+      toggleVerbal(); syncColabInfo(); saveDraft();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // Se estava editando e saiu da aba, preserva
+    function restoreEditing(){
+      const id = localStorage.getItem(EDIT_KEY);
+      if(!id) { loadDraft(); return; }
+      // mantém apenas o ID para informar no submit; o rascunho preencheu o resto
+      E.f_editing_id.value = id;
+      loadDraft();
+    }
+
+    // Submit (insert ou update)
     E.formAdv.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const colaborador_id = E.f_colab_id.value || null;
       if(!colaborador_id) return alert('Selecione um colaborador.');
 
       const nomeSnapshot = E.f_colab_id.selectedOptions[0]?.textContent || null;
+
       const payload = {
         colaborador_id,
         colaborador: nomeSnapshot,
-        data_ocorrencia: E.f_data_ocorrencia.value,
-        data_aplicacao:  E.f_data_aplicacao.value,
-        tipo:            E.f_tipo.value,
-        arquivo_path:    null,
+        data_ocorrencia: E.f_data_oc.value,
+        data_aplicacao:  E.f_data_ap.value,
+        tipo:            effectiveTipo(),
       };
 
-      const file = E.f_arquivo.files[0];
+      // upload opcional
+      const file = E.f_file.files[0];
+      let newPath = null;
       if (file){
         const ext = (file.name.split('.').pop() || '').toLowerCase();
         if(!['png','pdf'].includes(ext)) return alert('Envie um PNG ou PDF.');
         const path = `${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
         const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert:false });
         if(upErr){ alert('Falha no upload: '+upErr.message); return; }
+        newPath = path;
         payload.arquivo_path = path;
       }
 
-      const { error } = await supabaseClient.from('adv_registros').insert(payload);
-      if(error){ alert('Erro ao salvar: '+error.message); return; }
+      const editingId = E.f_editing_id.value || localStorage.getItem(EDIT_KEY) || '';
+      if(editingId){
+        const { error } = await supabaseClient.from('adv_registros').update(payload).eq('id', editingId);
+        if(error){ alert('Erro ao atualizar: '+error.message); return; }
+      }else{
+        const { error } = await supabaseClient.from('adv_registros').insert(payload);
+        if(error){ alert('Erro ao salvar: '+error.message); return; }
+      }
 
-      // vai para a tela de Registros
+      // Vai para Registros
       setTab('regs');
       await loadAdv();
 
-      // reseta o form para um novo lançamento
-      e.target.reset();
-      const today = new Date().toISOString().slice(0,10);
-      E.f_data_ocorrencia.value = today; E.f_data_aplicacao.value = today;
-      syncColabInfo();
+      // Limpa estado de edição, mas mantém um rascunho novo pronto
+      resetForm(false);
+      localStorage.removeItem(EDIT_KEY);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ======= UTILS & INIT =======
+    /*************** UTILS & INIT ***************/
     function escapeHtml(s){return (s||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 
+    // Evita assinaturas duplicadas
+    let rtBound = false;
+    async function bindRealtime(){
+      if(rtBound) return; rtBound = true;
+      supabaseClient.channel('colabs-rt')
+        .on('postgres_changes', { event:'*', schema:'public', table:'colaboradores' }, ()=>{ loadColabs(); setTimeout(loadColabs, 2000); })
+        .subscribe();
+      supabaseClient.channel('adv-rt')
+        .on('postgres_changes', { event:'*', schema:'public', table:'adv_registros' }, ()=>{ loadAdv(); setTimeout(loadAdv, 2000); })
+        .subscribe();
+    }
+
     (async function init(){
-      // sessão
       const { data: { session } } = await supabaseClient.auth.getSession();
       setLogged(session);
 
-      // datas padrão
+      // Datas padrão
       const today = new Date().toISOString().slice(0,10);
-      E.f_data_ocorrencia.value = today; E.f_data_aplicacao.value = today;
+      E.f_data_oc.value = today; E.f_data_ap.value = today;
+      toggleVerbal();
 
       if(session){
-        setTab('colab'); // Colaboradores é a tela principal
+        setTab('colab');              // Colaboradores como tela principal
         await loadColabs();
         await loadAdv();
+        bindRealtime();
+        restoreEditing();             // mantém rascunho/edição se existirem
       }
-      supabaseClient.auth.onAuthStateChange((_e, s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); setTab('colab'); } });
 
-      // realtime
-      supabaseClient.channel('colabs-rt')
-        .on('postgres_changes', { event:'*', schema:'public', table:'colaboradores' }, loadColabs)
-        .subscribe();
-      supabaseClient.channel('adv-rt')
-        .on('postgres_changes', { event:'*', schema:'public', table:'adv_registros' }, loadAdv)
-        .subscribe();
+      supabaseClient.auth.onAuthStateChange((_e, s)=>{
+        setLogged(s);
+        if(s){ loadColabs(); loadAdv(); bindRealtime(); setTab('colab'); restoreEditing(); }
+      });
     })();
   </script>
 </body>
