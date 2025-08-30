@@ -36,7 +36,6 @@
       display:flex; flex-direction:column; transition: background .25s ease, color .25s ease;
     }
 
-    /* ===== HEADER ===== */
     .topbar{
       position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
       gap:14px; padding:10px 16px; background:rgba(11,18,32,0.08); backdrop-filter:blur(8px);
@@ -50,8 +49,6 @@
     .userbox{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:14px}
     .icon-btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--btnText); cursor:pointer; font-weight:600}
 
-    /* ===== LAYOUT ===== */
-    /* >>> expandimos o container para a tabela ficar mais larga <<< */
     .container{max-width:1320px; width:100%; margin:24px auto; padding:0 16px; flex:1}
     .card{
       background:linear-gradient(180deg,var(--card),var(--card2));
@@ -66,7 +63,6 @@
     .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
     label{display:block; font-size:14px; color:var(--muted)}
 
-    /* ===== CAMPOS DESTACADOS ===== */
     .field{
       width:100%; margin-top:6px; padding:12px 14px; border-radius:14px;
       border:1.5px solid var(--fieldBorder); background:var(--field);
@@ -87,7 +83,7 @@
     .secondary{ background:transparent; color:var(--btnText); }
     .danger{ background:#ef4444; color:#fff; border-color:#7f1d1d }
 
-    table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; table-layout:auto}
+    table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px}
     th,td{border:1px solid var(--border); padding:10px; text-align:left}
     th{background:var(--tableHead)}
     a{ color:color-mix(in oklab, var(--accent) 70%, #ffffff 30%); text-decoration:underline; }
@@ -96,21 +92,20 @@
     .footer{ text-align:center; padding:14px; color:var(--muted); font-size:12px; }
     .container-sm{max-width:420px; width:100%; margin:40px auto; padding:0 16px}
 
-    /* responsivo */
-    @media (max-width: 820px){
-      .grid-4{grid-template-columns:1fr 1fr}
-      .grid-3{grid-template-columns:1fr 1fr}
-      .brand h1{font-size:16px}
-    }
-    @media (max-width: 480px){
-      .grid-4, .grid-3{grid-template-columns:1fr}
-    }
-
-    /* Ícones e ações lado a lado */
     .icon{ display:inline-flex; align-items:center; justify-content:center;
       width:36px; height:36px; border-radius:10px; border:1px solid var(--border);
       background:transparent; cursor:pointer; font-size:18px; }
     .actions-inline{ display:flex; gap:8px; align-items:center; }
+
+    /* agrupador */
+    .grp{ border:1px solid var(--border); border-radius:12px; margin-top:12px; overflow:hidden }
+    .grp-h{ display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:14px 16px; background:var(--tableHead); cursor:pointer; }
+    .grp-h strong{ font-size:16px }
+    .grp-h small{ color:var(--muted) }
+    .grp-b{ display:none; padding:0 10px 10px; }
+    .grp.open .grp-b{ display:block; }
+    .pill{ background:var(--accent); color:var(--accentText); border-radius:999px; padding:2px 10px; font-weight:700; }
   </style>
 </head>
 <body>
@@ -190,7 +185,7 @@
       <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
     </section>
 
-    <!-- ADVERTÊNCIAS (cadastro/edição) -->
+    <!-- ADVERTÊNCIAS -->
     <section id="tab-adv" class="card hidden">
       <div class="row" style="justify-content:space-between; align-items:center;">
         <h2 style="margin:0">Cadastrar Advertência</h2>
@@ -203,7 +198,7 @@
       <form id="form-adv" class="grid-4">
         <input type="hidden" id="f_editing_id" />
 
-        <!-- PESQUISÁVEL: digite e escolha -->
+        <!-- pesquisável com datalist -->
         <label>Colaborador
           <input id="f_colab_search" class="field" list="colab-list" placeholder="Digite para pesquisar..." autocomplete="off">
           <datalist id="colab-list"></datalist>
@@ -226,7 +221,6 @@
         <label>Data da aplicação
           <input type="date" id="f_data_aplicacao" required class="field" />
         </label>
-
         <label>Tipo de advertência
           <select id="f_tipo" required class="field">
             <option>Verbal</option>
@@ -234,7 +228,6 @@
             <option>Atraso</option>
           </select>
         </label>
-
         <label id="grp_verbal">
           Subtipo (quando Verbal)
           <select id="f_verbal_sub" class="field">
@@ -254,28 +247,14 @@
       <p class="muted" style="margin-top:8px">O formulário guarda rascunho automaticamente ao trocar de aba.</p>
     </section>
 
-    <!-- REGISTROS -->
+    <!-- REGISTROS AGRUPADOS -->
     <section id="tab-regs" class="card hidden">
       <div class="row" style="justify-content:space-between; align-items:center;">
         <h2 style="margin:0">Registros de Advertência</h2>
         <input id="filter" class="field" style="max-width:420px" placeholder="Filtrar por colaborador, CPF ou CTPS" />
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Colaborador (download)</th>
-            <th>CPF</th>
-            <th>CTPS</th>
-            <th>Série</th>
-            <th>Ocorrência</th>
-            <th>Aplicação</th>
-            <th>Tipo</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-reg"></tbody>
-      </table>
+      <div id="grp-container" style="margin-top:12px"></div>
       <p id="empty" class="muted">Nenhum registro ainda.</p>
     </section>
   </main>
@@ -284,340 +263,367 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
   <script>
-    /* ====== CONFIG (iguais aos anteriores) ====== */
+    /* CONFIG */
     const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
     const BUCKET = 'adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY = 'adv_form_draft_v2';
-    const EDIT_KEY  = 'adv_edit_id_v2';
+    const DRAFT_KEY='adv_form_draft_v3';
+    const EDIT_KEY='adv_edit_id_v3';
 
-    /* ====== ELEMENTOS ====== */
-    const E = {
-      viewAuth: document.getElementById('view-auth'),
-      viewApp: document.getElementById('view-app'),
-      btnLogout: document.getElementById('btn-logout'),
-      email: document.getElementById('email'),
-      password: document.getElementById('password'),
-      msg: document.getElementById('auth-msg'),
-      btnTheme: document.getElementById('btn-theme'),
+    /* ELEMENTOS */
+    const E={
+      viewAuth:document.getElementById('view-auth'),
+      viewApp:document.getElementById('view-app'),
+      btnLogout:document.getElementById('btn-logout'),
+      email:document.getElementById('email'),
+      password:document.getElementById('password'),
+      msg:document.getElementById('auth-msg'),
+      btnTheme:document.getElementById('btn-theme'),
 
-      tabBtns: document.querySelectorAll('.tabs button'),
-      tabColab: document.getElementById('tab-colab'),
-      tabAdv: document.getElementById('tab-adv'),
-      tabRegs: document.getElementById('tab-regs'),
+      tabBtns:document.querySelectorAll('.tabs button'),
+      tabColab:document.getElementById('tab-colab'),
+      tabAdv:document.getElementById('tab-adv'),
+      tabRegs:document.getElementById('tab-regs'),
 
-      toggleColabForm: document.getElementById('toggle-colab-form'),
-      cancelColabForm: document.getElementById('cancel-colab-form'),
-      formColab: document.getElementById('form-colab'),
-      c_nome: document.getElementById('c_nome'),
-      c_cpf: document.getElementById('c_cpf'),
-      c_ctps: document.getElementById('c_ctps'),
-      c_serie: document.getElementById('c_serie'),
-      tblColab: document.getElementById('tbl-colab'),
-      colabEmpty: document.getElementById('colab-empty'),
+      toggleColabForm:document.getElementById('toggle-colab-form'),
+      cancelColabForm:document.getElementById('cancel-colab-form'),
+      formColab:document.getElementById('form-colab'),
+      c_nome:document.getElementById('c_nome'),
+      c_cpf:document.getElementById('c_cpf'),
+      c_ctps:document.getElementById('c_ctps'),
+      c_serie:document.getElementById('c_serie'),
+      tblColab:document.getElementById('tbl-colab'),
+      colabEmpty:document.getElementById('colab-empty'),
 
-      formAdv: document.getElementById('form-adv'),
-      f_editing_id: document.getElementById('f_editing_id'),
-      f_colab_search: document.getElementById('f_colab_search'),
-      f_colab_list: document.getElementById('colab-list'),
-      f_colab_id: document.getElementById('f_colaborador_id'),
-      f_cpf: document.getElementById('f_cpf'),
-      f_ctps: document.getElementById('f_ctps'),
-      f_serie: document.getElementById('f_serie'),
-      f_data_oc: document.getElementById('f_data_ocorrencia'),
-      f_data_ap: document.getElementById('f_data_aplicacao'),
-      f_tipo: document.getElementById('f_tipo'),
-      f_verbal_grp: document.getElementById('grp_verbal'),
-      f_verbal_sub: document.getElementById('f_verbal_sub'),
-      f_file: document.getElementById('f_arquivo'),
-      btnNewAdv: document.getElementById('btn-new-adv'),
-      btnClearAdv: document.getElementById('btn-clear-adv'),
+      formAdv:document.getElementById('form-adv'),
+      f_edit:document.getElementById('f_editing_id'),
+      f_search:document.getElementById('f_colab_search'),
+      f_list:document.getElementById('colab-list'),
+      f_colab_id:document.getElementById('f_colaborador_id'),
+      f_cpf:document.getElementById('f_cpf'),
+      f_ctps:document.getElementById('f_ctps'),
+      f_serie:document.getElementById('f_serie'),
+      f_oc:document.getElementById('f_data_ocorrencia'),
+      f_ap:document.getElementById('f_data_aplicacao'),
+      f_tipo:document.getElementById('f_tipo'),
+      f_verbal_grp:document.getElementById('grp_verbal'),
+      f_verbal_sub:document.getElementById('f_verbal_sub'),
+      f_file:document.getElementById('f_arquivo'),
+      btnNew:document.getElementById('btn-new-adv'),
+      btnClear:document.getElementById('btn-clear-adv'),
 
-      filter: document.getElementById('filter'),
-      tblReg: document.getElementById('tbl-reg'),
-      empty: document.getElementById('empty'),
+      filter:document.getElementById('filter'),
+      grpContainer:document.getElementById('grp-container'),
+      empty:document.getElementById('empty'),
     };
 
-    /* ====== TEMA ====== */
+    /* THEME */
     const THEME_KEY='ft_theme';
     function applyTheme(t){
-      if(t) document.body.setAttribute('data-theme', t);
+      if(t) document.body.setAttribute('data-theme',t);
       else document.body.removeAttribute('data-theme');
-      E.btnTheme.textContent = (document.body.getAttribute('data-theme')==='light'||
-        (!document.body.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: light)').matches))
-        ? '🌞 Tema' : '🌙 Tema';
+      E.btnTheme.textContent=(document.body.getAttribute('data-theme')==='light'||
+        (!document.body.hasAttribute('data-theme')&&matchMedia('(prefers-color-scheme: light)').matches))?'🌞 Tema':'🌙 Tema';
     }
     applyTheme(localStorage.getItem(THEME_KEY));
-    E.btnTheme.addEventListener('click', ()=>{ const c=document.body.getAttribute('data-theme'); const n=c==='light'?'dark':'light'; document.body.setAttribute('data-theme',n); localStorage.setItem(THEME_KEY,n); applyTheme(n); });
+    E.btnTheme.onclick=()=>{const c=document.body.getAttribute('data-theme'); const n=c==='light'?'dark':'light'; document.body.setAttribute('data-theme',n); localStorage.setItem(THEME_KEY,n); applyTheme(n);};
 
-    /* ====== TABS (salva rascunho ao trocar) ====== */
-    function setTab(name){
-      saveDraft(); // << garante persistência ao trocar de tela
-      E.tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab===name));
-      E.tabColab.classList.toggle('hidden', name!=='colab');
-      E.tabAdv.classList.toggle('hidden', name!=='adv');
-      E.tabRegs.classList.toggle('hidden', name!=='regs');
-      if(name==='regs') loadAdv();
-      if(name==='adv') loadDraft();  // << restaura rascunho sempre que voltar
+    /* TABS (salva rascunho ao trocar) */
+    function setTab(n){
+      saveDraft();
+      E.tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
+      E.tabColab.classList.toggle('hidden',n!=='colab');
+      E.tabAdv.classList.toggle('hidden',n!=='adv');
+      E.tabRegs.classList.toggle('hidden',n!=='regs');
+      if(n==='regs') loadAdv();
+      if(n==='adv') loadDraft();
       window.scrollTo({top:0,behavior:'smooth'});
     }
     document.querySelector('[data-tab="colab"]').onclick=()=>setTab('colab');
     document.querySelector('[data-tab="adv"]').onclick =()=>setTab('adv');
     document.querySelector('[data-tab="regs"]').onclick=()=>setTab('regs');
 
-    /* ====== AUTH ====== */
+    /* AUTH */
     function setLogged(s){
       const logged=!!s;
-      document.getElementById('user-email').textContent = logged ? s.user.email : 'Deslogado';
-      E.viewAuth.classList.toggle('hidden', logged);
-      E.viewApp.classList.toggle('hidden', !logged);
-      E.btnLogout.classList.toggle('hidden', !logged);
+      document.getElementById('user-email').textContent=logged?s.user.email:'Deslogado';
+      E.viewAuth.classList.toggle('hidden',logged);
+      E.viewApp .classList.toggle('hidden',!logged);
+      E.btnLogout.classList.toggle('hidden',!logged);
     }
-    E.btnLogout.onclick = async ()=>{ await supabaseClient.auth.signOut(); };
-
-    document.getElementById('btn-login').onclick= async ()=>{
-      const { error } = await supabaseClient.auth.signInWithPassword({ email:E.email.value.trim(), password:E.password.value });
-      if(error){ E.msg.textContent=error.message; E.msg.style.color='#f87171'; }
+    document.getElementById('btn-logout').onclick=async()=>{await supabaseClient.auth.signOut();};
+    document.getElementById('btn-login').onclick=async()=>{
+      const { error }=await supabaseClient.auth.signInWithPassword({email:E.email.value.trim(),password:E.password.value});
+      if(error){E.msg.textContent=error.message;E.msg.style.color='#f87171';}
     };
-    document.getElementById('btn-signup').onclick = async ()=>{
-      const { error } = await supabaseClient.auth.signUp({ email:E.email.value.trim(), password:E.password.value });
-      E.msg.textContent = error ? error.message : 'Conta criada!';
-      E.msg.style.color = error ? '#f87171' : '#34d399';
+    document.getElementById('btn-signup').onclick=async()=>{
+      const { error }=await supabaseClient.auth.signUp({email:E.email.value.trim(),password:E.password.value});
+      E.msg.textContent=error?error.message:'Conta criada!'; E.msg.style.color=error?'#f87171':'#34d399';
     };
-    document.getElementById('btn-recover').onclick = async ()=>{
-      const email=E.email.value.trim(); if(!email) return (E.msg.textContent='Digite seu e-mail.');
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email,{ redirectTo:location.origin });
-      E.msg.textContent = error ? error.message : 'Se existir, enviaremos o link.';
-      E.msg.style.color = error ? '#f87171' : '#34d399';
+    document.getElementById('btn-recover').onclick=async()=>{
+      const email=E.email.value.trim(); if(!email){E.msg.textContent='Digite seu e-mail.';return;}
+      const { error }=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+      E.msg.textContent=error?error.message:'Se existir, enviaremos o link.'; E.msg.style.color=error?'#f87171':'#34d399';
     };
 
-    /* ====== COLABORADORES ====== */
-    E.toggleColabForm.onclick = ()=>E.formColab.classList.toggle('hidden');
-    E.cancelColabForm.onclick = ()=>E.formColab.classList.add('hidden');
+    /* COLABORADORES */
+    E.toggleColabForm.onclick=()=>E.formColab.classList.toggle('hidden');
+    E.cancelColabForm.onclick=()=>E.formColab.classList.add('hidden');
 
-    let colabList = [];        // [{id, nome, cpf, ctps, serie}, ...] (ordenado)
-    let advCache = [];         // registros para filtro
+    let colabList=[];  // [{id,nome,cpf,ctps,serie}]
+    let advCache=[];   // adv_view cache para filtro/agrupamento
 
     async function loadColabs(){
-      const { data, error } = await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
-      if(error){ console.error(error); return; }
-      colabList = data||[];
+      const { data,error }=await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
+      if(error){console.error(error);return;}
+      colabList=data||[];
       renderColabs(colabList);
-      fillColabDatalist(colabList);
-      // se houver rascunho com colaborador_id, restaura
-      const id = E.f_colab_id.value;
-      if(id) setColabById(id);
+      fillColabDatalist();
+      // se rascunho tiver id, sincroniza
+      if(E.f_colab_id.value) setColabById(E.f_colab_id.value);
     }
     function renderColabs(items){
       E.tblColab.innerHTML='';
-      if(!items.length){ E.colabEmpty.classList.remove('hidden'); return; }
+      if(!items.length){E.colabEmpty.classList.remove('hidden');return;}
       E.colabEmpty.classList.add('hidden');
       for(const c of items){
         const tr=document.createElement('tr');
         tr.innerHTML=`<td>${esc(c.nome)}</td><td>${esc(c.cpf||'')}</td><td>${esc(c.ctps||'')}</td><td>${esc(c.serie||'')}</td>
-          <td><button class="icon" title="Excluir">🗑️</button></td>`;
+        <td><button class="icon" title="Excluir">🗑️</button></td>`;
         tr.querySelector('button').onclick=()=>delColab(c.id);
         E.tblColab.appendChild(tr);
       }
     }
-    function fillColabDatalist(items){
-      // recria sugestões de acordo com o que foi digitado (substring)
-      const q = (E.f_colab_search.value||'').toLowerCase();
-      const filtered = q ? items.filter(c=>c.nome.toLowerCase().includes(q)) : items;
-      E.f_colab_list.innerHTML='';
-      for(const c of filtered){
-        const op=document.createElement('option');
-        op.value=c.nome; // mostrar nome; o id guardamos à parte quando confirmar
-        E.f_colab_list.appendChild(op);
+    function fillColabDatalist(){
+      const q=(E.f_search.value||'').toLowerCase();
+      const list=q?colabList.filter(c=>c.nome.toLowerCase().includes(q)):colabList;
+      E.f_list.innerHTML='';
+      for(const c of list){
+        const o=document.createElement('option'); o.value=c.nome; E.f_list.appendChild(o);
       }
     }
     function setColabById(id){
-      const c = colabList.find(x=>String(x.id)===String(id));
-      if(!c){ E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; return; }
-      E.f_colab_id.value = c.id;
-      E.f_colab_search.value = c.nome;
-      E.f_cpf.value = c.cpf||''; E.f_ctps.value=c.ctps||''; E.f_serie.value=c.serie||'';
+      const c=colabList.find(x=>String(x.id)===String(id));
+      if(!c){E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';return;}
+      E.f_colab_id.value=c.id;
+      E.f_search.value=c.nome;
+      E.f_cpf.value=c.cpf||''; E.f_ctps.value=c.ctps||''; E.f_serie.value=c.serie||'';
       saveDraft();
     }
-    function confirmColabFromSearch(){
-      const name = (E.f_colab_search.value||'').trim().toLowerCase();
-      if(!name){ E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; saveDraft(); return; }
-      const match = colabList.find(c=>c.nome.toLowerCase()===name) || colabList.find(c=>c.nome.toLowerCase().includes(name));
-      if(match) setColabById(match.id);
+    function resolveColabFromSearch(){
+      const name=(E.f_search.value||'').trim().toLowerCase();
+      if(!name){E.f_colab_id.value='';E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';saveDraft();return;}
+      // 1º exato, 2º começa com, 3º contém
+      const ex=colabList.find(c=>c.nome.toLowerCase()===name)
+           || colabList.find(c=>c.nome.toLowerCase().startsWith(name))
+           || colabList.find(c=>c.nome.toLowerCase().includes(name));
+      if(ex) setColabById(ex.id);
     }
-    E.f_colab_search.addEventListener('input', ()=>fillColabDatalist(colabList));
-    E.f_colab_search.addEventListener('change', confirmColabFromSearch);
-    E.f_colab_search.addEventListener('blur', confirmColabFromSearch);
+    E.f_search.addEventListener('input', fillColabDatalist);
+    E.f_search.addEventListener('change', resolveColabFromSearch);
+    E.f_search.addEventListener('blur', resolveColabFromSearch);
 
     E.formColab.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      const payload={ nome:E.c_nome.value.trim(), cpf:E.c_cpf.value.trim()||null, ctps:E.c_ctps.value.trim()||null, serie:E.c_serie.value.trim()||null };
+      const payload={nome:E.c_nome.value.trim(),cpf:E.c_cpf.value.trim()||null,ctps:E.c_ctps.value.trim()||null,serie:E.c_serie.value.trim()||null};
       if(!payload.nome) return;
-      const { data, error } = await supabaseClient.from('colaboradores').insert(payload).select().single();
-      if(error){ alert('Erro ao salvar colaborador: '+error.message); return; }
+      const { data,error }=await supabaseClient.from('colaboradores').insert(payload).select().single();
+      if(error){alert('Erro ao salvar colaborador: '+error.message);return;}
       e.target.reset(); E.formColab.classList.add('hidden');
       await loadColabs();
       if(data?.id) setColabById(data.id);
     });
     async function delColab(id){
-      if(!confirm('Excluir colaborador?')) return;
-      await supabaseClient.from('colaboradores').delete().eq('id', id);
-      setTimeout(loadColabs, 2000); // fallback
+      if(!confirm('Excluir colaborador?'))return;
+      await supabaseClient.from('colaboradores').delete().eq('id',id);
+      setTimeout(loadColabs,2000);
     }
 
-    /* ====== REGISTROS ====== */
+    /* REGISTROS AGRUPADOS */
     async function loadAdv(){
-      const { data, error } = await supabaseClient.from('adv_registros_view').select('*').order('colaborador_nome',{ascending:true});
-      if(error){ console.error(error); return; }
-      advCache = (data||[]).slice().sort((a,b)=>(a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
-      renderAdv(advCache);
+      const { data,error }=await supabaseClient.from('adv_registros_view').select('*');
+      if(error){console.error(error);return;}
+      advCache=(data||[]).slice().sort((a,b)=>(a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
+      renderGrouped(advCache);
     }
-    function renderAdv(items){
-      E.tblReg.innerHTML='';
-      if(!items.length){ E.empty.classList.remove('hidden'); return; }
+    function renderGrouped(items){
+      E.grpContainer.innerHTML='';
+      if(!items.length){E.empty.classList.remove('hidden');return;}
       E.empty.classList.add('hidden');
+
+      // group by colaborador_nome
+      const map=new Map();
       for(const r of items){
-        const tr=document.createElement('tr');
+        const k=r.colaborador_nome||r.colaborador||'—';
+        if(!map.has(k)) map.set(k,[]);
+        map.get(k).push(r);
+      }
+      for(const [nome,arr] of map){
+        const grp=document.createElement('div'); grp.className='grp';
+        const head=document.createElement('div'); head.className='grp-h';
+        const left=document.createElement('div'); left.innerHTML=`<strong>${esc(nome)}</strong> <small class="muted">• ${arr[0].colaborador_cpf||'—'} • CTPS ${arr[0].colaborador_ctps||'—'} • Série ${arr[0].colaborador_serie||'—'}</small>`;
+        const right=document.createElement('div'); right.innerHTML=`<span class="pill">${arr.length}</span>`;
+        head.append(left,right); grp.appendChild(head);
 
-        const tdNome=document.createElement('td');
-        if(r.arquivo_path){
-          const { data:pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
-          const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent=r.colaborador_nome||r.colaborador||'—';
-          tdNome.appendChild(a);
-        }else tdNome.textContent=r.colaborador_nome||r.colaborador||'—';
-
-        const tdCpf=document.createElement('td'); tdCpf.textContent=r.colaborador_cpf||'—';
-        const tdCtps=document.createElement('td'); tdCtps.textContent=r.colaborador_ctps||'—';
-        const tdSerie=document.createElement('td'); tdSerie.textContent=r.colaborador_serie||'—';
-        const tdOc=document.createElement('td'); tdOc.textContent=r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
-        const tdAp=document.createElement('td'); tdAp.textContent=r.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
-        const tdTp=document.createElement('td'); tdTp.textContent=r.tipo||'—';
-
-        const tdAc=document.createElement('td');
-        const wrap=document.createElement('div'); wrap.className='actions-inline';
-        const bEdit=document.createElement('button'); bEdit.className='icon'; bEdit.title='Editar'; bEdit.textContent='✏️';
-        const bDel =document.createElement('button'); bDel .className='icon'; bDel .title='Excluir'; bDel .textContent='🗑️';
-        bEdit.onclick=()=>startEdit(r);
-        bDel .onclick=()=>delAdv(r.id, r.arquivo_path);
-        wrap.append(bEdit,bDel); tdAc.appendChild(wrap);
-
-        tr.append(tdNome,tdCpf,tdCtps,tdSerie,tdOc,tdAp,tdTp,tdAc);
-        E.tblReg.appendChild(tr);
+        const body=document.createElement('div'); body.className='grp-b';
+        const table=document.createElement('table'); table.style.marginTop='10px';
+        table.innerHTML=`<thead><tr><th>Ocorrência</th><th>Aplicação</th><th>Tipo</th><th>Anexo</th><th>Ações</th></tr></thead>`;
+        const tb=document.createElement('tbody');
+        for(const r of arr){
+          const tr=document.createElement('tr');
+          const tdo=document.createElement('td'); tdo.textContent=r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
+          const tda=document.createElement('td'); tda.textContent=r.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
+          const ttt=document.createElement('td'); ttt.textContent=r.tipo||'—';
+          const tan=document.createElement('td');
+          if(r.arquivo_path){
+            const { data:pub }=supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
+            const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent='baixar';
+            tan.appendChild(a);
+          }else tan.textContent='—';
+          const tac=document.createElement('td');
+          const wrap=document.createElement('div'); wrap.className='actions-inline';
+          const ed=document.createElement('button'); ed.className='icon'; ed.title='Editar'; ed.textContent='✏️';
+          const ex=document.createElement('button'); ex.className='icon'; ex.title='Excluir'; ex.textContent='🗑️';
+          ed.onclick=()=>startEdit(r);
+          ex.onclick=()=>delAdv(r.id,r.arquivo_path);
+          wrap.append(ed,ex); tac.appendChild(wrap);
+          tr.append(tdo,tda,ttt,tan,tac); tb.appendChild(tr);
+        }
+        table.appendChild(tb); body.appendChild(table); grp.appendChild(body);
+        head.onclick=()=>grp.classList.toggle('open');
+        E.grpContainer.appendChild(grp);
       }
     }
-    E.filter.addEventListener('input', ()=>{
+
+    E.filter.addEventListener('input',()=>{
       const f=E.filter.value.toLowerCase().trim();
-      renderAdv(advCache.filter(x=>{
+      const filtered=advCache.filter(x=>{
         const n=(x.colaborador_nome||x.colaborador||'').toLowerCase();
         const cpf=(x.colaborador_cpf||'').toLowerCase();
         const ctps=(x.colaborador_ctps||'').toLowerCase();
         return n.includes(f)||cpf.includes(f)||ctps.includes(f);
-      }));
+      });
+      renderGrouped(filtered);
     });
-    async function delAdv(id, path){
-      if(!confirm('Excluir registro?')) return;
-      await supabaseClient.from('adv_registros').delete().eq('id', id);
+
+    async function delAdv(id,path){
+      if(!confirm('Excluir registro?'))return;
+      await supabaseClient.from('adv_registros').delete().eq('id',id);
       if(path) await supabaseClient.storage.from(BUCKET).remove([path]);
-      setTimeout(loadAdv, 2000);
+      setTimeout(loadAdv,2000);
     }
 
-    /* ====== ADVERTÊNCIA (cadastro/edição) ====== */
-    function effectiveTipo(){ return E.f_tipo.value==='Verbal' ? `Verbal (${E.f_verbal_sub.value})` : E.f_tipo.value; }
-    function toggleVerbal(){ E.f_verbal_grp.style.display = (E.f_tipo.value==='Verbal') ? 'block' : 'none'; }
-    E.f_tipo.addEventListener('change', ()=>{ toggleVerbal(); saveDraft(); });
-    E.f_verbal_sub.addEventListener('change', saveDraft);
+    /* ADVERTÊNCIA (cadastro/edição) */
+    function effectiveTipo(){return E.f_tipo.value==='Verbal'?`Verbal (${E.f_verbal_sub.value})`:E.f_tipo.value;}
+    function toggleVerbal(){E.f_verbal_grp.style.display=(E.f_tipo.value==='Verbal')?'block':'none';}
+    E.f_tipo.addEventListener('change',()=>{toggleVerbal();saveDraft();});
+    E.f_verbal_sub.addEventListener('change',saveDraft);
 
     function saveDraft(){
-      const draft={
+      localStorage.setItem(''+DRAFT_KEY,JSON.stringify({
         colaborador_id:E.f_colab_id.value||'',
-        colaborador_busca:E.f_colab_search.value||'',
-        data_ocorrencia:E.f_data_oc.value||'',
-        data_aplicacao:E.f_data_ap.value||'',
+        colaborador_busca:E.f_search.value||'',
+        data_ocorrencia:E.f_oc.value||'',
+        data_aplicacao:E.f_ap.value||'',
         tipo:E.f_tipo.value||'Verbal',
         verbal_sub:E.f_verbal_sub.value||'Atraso',
-      };
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      }));
     }
     function loadDraft(){
-      const raw=localStorage.getItem(DRAFT_KEY);
-      if(!raw) return;
+      const raw=localStorage.getItem(''+DRAFT_KEY); if(!raw) return;
       try{
         const d=JSON.parse(raw);
-        if(d.colaborador_busca!==undefined) E.f_colab_search.value=d.colaborador_busca;
-        if(d.colaborador_id){ E.f_colab_id.value=d.colaborador_id; setColabById(d.colaborador_id); }
-        if(d.data_ocorrencia) E.f_data_oc.value=d.data_ocorrencia;
-        if(d.data_aplicacao)  E.f_data_ap.value=d.data_aplicacao;
-        if(d.tipo){ E.f_tipo.value=d.tipo; toggleVerbal(); }
-        if(d.verbal_sub) E.f_verbal_sub.value=d.verbal_sub;
+        if(d.colaborador_busca!==undefined) E.f_search.value=d.colaborador_busca;
+        if(d.colaborador_id){E.f_colab_id.value=d.colaborador_id; setColabById(d.colaborador_id);} else resolveColabFromSearch();
+        if(d.data_ocorrencia)E.f_oc.value=d.data_ocorrencia;
+        if(d.data_aplicacao)E.f_ap.value=d.data_aplicacao;
+        if(d.tipo){E.f_tipo.value=d.tipo; toggleVerbal();}
+        if(d.verbal_sub)E.f_verbal_sub.value=d.verbal_sub;
       }catch{}
     }
-    [E.f_colab_search,E.f_data_oc,E.f_data_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input', saveDraft));
+    [E.f_search,E.f_oc,E.f_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input',saveDraft));
 
     function resetForm(){
-      E.f_editing_id.value=''; localStorage.removeItem(EDIT_KEY);
+      E.f_edit.value=''; localStorage.removeItem(EDIT_KEY);
       const today=new Date().toISOString().slice(0,10);
-      E.f_colab_search.value=''; E.f_colab_id.value='';
+      E.f_search.value=''; E.f_colab_id.value='';
       E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
-      E.f_data_oc.value=today; E.f_data_ap.value=today;
+      E.f_oc.value=today; E.f_ap.value=today;
       E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Atraso'; E.f_file.value='';
       toggleVerbal(); saveDraft();
     }
-    E.btnNewAdv.onclick = ()=>{ resetForm(); setTab('adv'); };
-    E.btnClearAdv.onclick = ()=>resetForm();
+    E.btnNew.onclick=()=>{resetForm(); setTab('adv');};
+    E.btnClear.onclick=()=>resetForm();
 
     function startEdit(r){
       setTab('adv');
-      E.f_editing_id.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
-      if(r.colaborador_id) setColabById(r.colaborador_id); else {E.f_colab_search.value=r.colaborador_nome||''; confirmColabFromSearch();}
-      E.f_data_oc.value=r.data_ocorrencia?.substring(0,10)||'';
-      E.f_data_ap.value=r.data_aplicacao?.substring(0,10)||'';
+      E.f_edit.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
+      if(r.colaborador_id) setColabById(r.colaborador_id); else {E.f_search.value=r.colaborador_nome||''; resolveColabFromSearch();}
+      E.f_oc.value=r.data_ocorrencia?.substring(0,10)||'';
+      E.f_ap.value=r.data_aplicacao?.substring(0,10)||'';
       const m=/^Verbal\s*\((.+)\)$/.exec(r.tipo||'');
-      if(m){ E.f_tipo.value='Verbal'; E.f_verbal_sub.value=m[1]; } else { E.f_tipo.value=r.tipo||'Verbal'; }
+      if(m){E.f_tipo.value='Verbal';E.f_verbal_sub.value=m[1];} else {E.f_tipo.value=r.tipo||'Verbal';}
       toggleVerbal(); saveDraft();
     }
 
     E.formAdv.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      if(!E.f_colab_id.value) return alert('Selecione um colaborador válido.');
-      const nome = E.f_colab_search.value || colabList.find(c=>String(c.id)===String(E.f_colab_id.value))?.nome || null;
-      const payload={ colaborador_id:E.f_colab_id.value, colaborador:nome, data_ocorrencia:E.f_data_oc.value, data_aplicacao:E.f_data_ap.value, tipo:effectiveTipo() };
+      // garante que temos id mesmo se o usuário só digitou e clicou salvar
+      if(!E.f_colab_id.value) resolveColabFromSearch();
+      if(!E.f_colab_id.value) { alert('Selecione um colaborador válido.'); return; }
+
+      const nome=E.f_search.value || (colabList.find(c=>String(c.id)===String(E.f_colab_id.value))?.nome) || null;
+      const payload={
+        colaborador_id:E.f_colab_id.value,
+        colaborador:nome,
+        data_ocorrencia:E.f_oc.value,
+        data_aplicacao:E.f_ap.value,
+        tipo:effectiveTipo()
+      };
+
+      // upload opcional
       const file=E.f_file.files[0];
       if(file){
         const ext=(file.name.split('.').pop()||'').toLowerCase();
         if(!['png','pdf'].includes(ext)) return alert('Envie PNG ou PDF.');
         const path=`${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
-        const { error:upErr } = await supabaseClient.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
+        const { error:upErr }=await supabaseClient.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
         if(upErr) return alert('Falha no upload: '+upErr.message);
         payload.arquivo_path=path;
       }
 
-      const editingId = E.f_editing_id.value || localStorage.getItem(EDIT_KEY) || '';
-      if(editingId){ await supabaseClient.from('adv_registros').update(payload).eq('id', editingId); }
-      else { await supabaseClient.from('adv_registros').insert(payload); }
+      const editingId=E.f_edit.value||localStorage.getItem(EDIT_KEY)||'';
+      if(editingId){
+        const { error }=await supabaseClient.from('adv_registros').update(payload).eq('id',editingId);
+        if(error) return alert('Erro ao atualizar: '+error.message);
+      }else{
+        const { error }=await supabaseClient.from('adv_registros').insert(payload);
+        if(error) return alert('Erro ao salvar: '+error.message);
+      }
 
+      // vai para registros agrupados e recarrega
       setTab('regs'); await loadAdv();
-      resetForm(); // prepara para próximo
+      resetForm();
     });
 
-    /* ====== INIT ====== */
+    /* UTILS & INIT */
     function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
-    let rtBound=false;
+    let rt=false;
     async function bindRt(){
-      if(rtBound) return; rtBound=true;
-      supabaseClient.channel('colabs-rt').on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},()=>{loadColabs(); setTimeout(loadColabs,2000);}).subscribe();
-      supabaseClient.channel('adv-rt').on('postgres_changes',{event:'*',schema:'public',table:'adv_registros'},()=>{loadAdv(); setTimeout(loadAdv,2000);}).subscribe();
+      if(rt) return; rt=true;
+      supabaseClient.channel('colabs-rt').on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},()=>{loadColabs();setTimeout(loadColabs,2000);}).subscribe();
+      supabaseClient.channel('adv-rt').on('postgres_changes',{event:'*',schema:'public',table:'adv_registros'},()=>{loadAdv();setTimeout(loadAdv,2000);}).subscribe();
     }
-
     (async function init(){
-      const { data:{ session } } = await supabaseClient.auth.getSession();
+      const { data:{ session } }=await supabaseClient.auth.getSession();
       setLogged(session);
       const today=new Date().toISOString().slice(0,10);
-      E.f_data_oc.value=today; E.f_data_ap.value=today; toggleVerbal();
+      E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
 
       if(session){ setTab('colab'); await loadColabs(); await loadAdv(); bindRt(); loadDraft(); }
-      supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); } });
+      supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); }});
     })();
   </script>
 </body>
