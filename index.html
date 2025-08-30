@@ -8,13 +8,11 @@
   <style>
     * { box-sizing: border-box; }
     :root{
-      /* escuro (default) */
       --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --card2:#0c1325; --border:#1f2a44;
       --txt:#e5e7eb; --muted:#9aa4b2; --accent:#22c55e; --accentText:#06270e;
       --btnText:#e5e7eb; --tableHead:#0a1120;
       --field:#0a1120; --fieldBorder:#253555; --fieldShadow:rgba(0,0,0,.35);
     }
-    /* claro */
     body[data-theme="light"]{
       --bg:#f5f7fb; --bg2:#eef2f9; --card:#ffffff; --card2:#f8fafc; --border:#e5e7eb;
       --txt:#0f172a; --muted:#596173; --accent:#2563eb; --accentText:#ffffff;
@@ -53,7 +51,8 @@
     .icon-btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--btnText); cursor:pointer; font-weight:600}
 
     /* ===== LAYOUT ===== */
-    .container{max-width:1100px; width:100%; margin:24px auto; padding:0 16px; flex:1}
+    /* >>> expandimos o container para a tabela ficar mais larga <<< */
+    .container{max-width:1320px; width:100%; margin:24px auto; padding:0 16px; flex:1}
     .card{
       background:linear-gradient(180deg,var(--card),var(--card2));
       border:1px solid var(--border); border-radius:16px; padding:18px;
@@ -80,7 +79,6 @@
     }
     input[readonly].field{opacity:.9}
 
-    /* select tema + contraste */
     select.field, select.field option { color:var(--txt); background:var(--field) }
     body[data-theme="light"] select.field, body[data-theme="light"] select.field option{ color:#0f172a; background:#ffffff }
 
@@ -89,7 +87,7 @@
     .secondary{ background:transparent; color:var(--btnText); }
     .danger{ background:#ef4444; color:#fff; border-color:#7f1d1d }
 
-    table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px}
+    table{width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; table-layout:auto}
     th,td{border:1px solid var(--border); padding:10px; text-align:left}
     th{background:var(--tableHead)}
     a{ color:color-mix(in oklab, var(--accent) 70%, #ffffff 30%); text-decoration:underline; }
@@ -108,13 +106,11 @@
       .grid-4, .grid-3{grid-template-columns:1fr}
     }
 
-    /* Ícones-botão */
-    .icon{
-      display:inline-flex; align-items:center; justify-content:center;
+    /* Ícones e ações lado a lado */
+    .icon{ display:inline-flex; align-items:center; justify-content:center;
       width:36px; height:36px; border-radius:10px; border:1px solid var(--border);
-      background:transparent; cursor:pointer; font-size:18px;
-    }
-    .icon[title]{ position:relative }
+      background:transparent; cursor:pointer; font-size:18px; }
+    .actions-inline{ display:flex; gap:8px; align-items:center; }
   </style>
 </head>
 <body>
@@ -159,7 +155,7 @@
       <button data-tab="regs">Registros de Advertência</button>
     </div>
 
-    <!-- COLABORADORES (tela principal) -->
+    <!-- COLABORADORES -->
     <section id="tab-colab" class="card">
       <div class="row" style="justify-content:space-between; align-items:center;">
         <h2 style="margin:0">Colaboradores</h2>
@@ -194,11 +190,10 @@
       <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
     </section>
 
-    <!-- ADVERTÊNCIAS (apenas cadastro/edição) -->
+    <!-- ADVERTÊNCIAS (cadastro/edição) -->
     <section id="tab-adv" class="card hidden">
       <div class="row" style="justify-content:space-between; align-items:center;">
         <h2 style="margin:0">Cadastrar Advertência</h2>
-        <!-- Ações rápidas: novo (🆕) limpar (🧹) -->
         <div>
           <button id="btn-new-adv" class="icon" title="Nova advertência">🆕</button>
           <button id="btn-clear-adv" class="icon" title="Limpar formulário">🧹</button>
@@ -208,9 +203,13 @@
       <form id="form-adv" class="grid-4">
         <input type="hidden" id="f_editing_id" />
 
+        <!-- PESQUISÁVEL: digite e escolha -->
         <label>Colaborador
-          <select id="f_colaborador_id" required class="field"></select>
+          <input id="f_colab_search" class="field" list="colab-list" placeholder="Digite para pesquisar..." autocomplete="off">
+          <datalist id="colab-list"></datalist>
+          <input type="hidden" id="f_colaborador_id">
         </label>
+
         <label>CPF
           <input id="f_cpf" readonly placeholder="—" class="field" />
         </label>
@@ -236,8 +235,7 @@
           </select>
         </label>
 
-        <!-- Subtipo para quando for Verbal -->
-        <label id="grp_verbal" class="">
+        <label id="grp_verbal">
           Subtipo (quando Verbal)
           <select id="f_verbal_sub" class="field">
             <option>Atraso</option>
@@ -253,15 +251,14 @@
           <button class="primary" type="submit" title="Salvar (inserir ou atualizar)">💾 Salvar</button>
         </div>
       </form>
-      <p class="muted" id="adv-hint" style="margin-top:8px">Dica: ao trocar de aba, o rascunho do formulário permanece salvo automaticamente.</p>
+      <p class="muted" style="margin-top:8px">O formulário guarda rascunho automaticamente ao trocar de aba.</p>
     </section>
 
-    <!-- REGISTROS (nova aba) -->
+    <!-- REGISTROS -->
     <section id="tab-regs" class="card hidden">
       <div class="row" style="justify-content:space-between; align-items:center;">
         <h2 style="margin:0">Registros de Advertência</h2>
-        <!-- Filtro -->
-        <input id="filter" class="field" style="max-width:360px" placeholder="Filtrar por colaborador, CPF ou CTPS" />
+        <input id="filter" class="field" style="max-width:420px" placeholder="Filtrar por colaborador, CPF ou CTPS" />
       </div>
 
       <table>
@@ -274,7 +271,7 @@
             <th>Ocorrência</th>
             <th>Aplicação</th>
             <th>Tipo</th>
-            <th style="width:1%">Ações</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody id="tbl-reg"></tbody>
@@ -285,40 +282,32 @@
 
   <footer class="footer">Desenvolvido por Bruno Ferreira da Cruz</footer>
 
-  <!-- Supabase UMD -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
   <script>
-    /*************** CONFIG ***************/
-    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co";   // seu projeto
+    /* ====== CONFIG (iguais aos anteriores) ====== */
+    const SUPABASE_URL = "https://bgophlququlizkwioveu.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
     const BUCKET = 'adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY = 'adv_form_draft_v1';
-    const EDIT_KEY  = 'adv_edit_id_v1';
+    const DRAFT_KEY = 'adv_form_draft_v2';
+    const EDIT_KEY  = 'adv_edit_id_v2';
 
-    /*************** ELEMENTOS ***************/
+    /* ====== ELEMENTOS ====== */
     const E = {
-      // auth
       viewAuth: document.getElementById('view-auth'),
       viewApp: document.getElementById('view-app'),
-      userEmail: document.getElementById('user-email'),
       btnLogout: document.getElementById('btn-logout'),
       email: document.getElementById('email'),
       password: document.getElementById('password'),
-      btnLogin: document.getElementById('btn-login'),
-      btnSignup: document.getElementById('btn-signup'),
-      btnRecover: document.getElementById('btn-recover'),
       msg: document.getElementById('auth-msg'),
-      // header
-      homeLink: document.getElementById('home-link'),
       btnTheme: document.getElementById('btn-theme'),
-      // tabs
+
       tabBtns: document.querySelectorAll('.tabs button'),
       tabColab: document.getElementById('tab-colab'),
       tabAdv: document.getElementById('tab-adv'),
       tabRegs: document.getElementById('tab-regs'),
-      // colab
+
       toggleColabForm: document.getElementById('toggle-colab-form'),
       cancelColabForm: document.getElementById('cancel-colab-form'),
       formColab: document.getElementById('form-colab'),
@@ -328,9 +317,11 @@
       c_serie: document.getElementById('c_serie'),
       tblColab: document.getElementById('tbl-colab'),
       colabEmpty: document.getElementById('colab-empty'),
-      // adv
+
       formAdv: document.getElementById('form-adv'),
       f_editing_id: document.getElementById('f_editing_id'),
+      f_colab_search: document.getElementById('f_colab_search'),
+      f_colab_list: document.getElementById('colab-list'),
       f_colab_id: document.getElementById('f_colaborador_id'),
       f_cpf: document.getElementById('f_cpf'),
       f_ctps: document.getElementById('f_ctps'),
@@ -343,394 +334,290 @@
       f_file: document.getElementById('f_arquivo'),
       btnNewAdv: document.getElementById('btn-new-adv'),
       btnClearAdv: document.getElementById('btn-clear-adv'),
-      // regs
+
       filter: document.getElementById('filter'),
       tblReg: document.getElementById('tbl-reg'),
       empty: document.getElementById('empty'),
     };
 
-    /*************** THEME ***************/
-    const THEME_KEY = 'ft_theme';
-    function applyTheme(theme){
-      if(theme) document.body.setAttribute('data-theme', theme);
+    /* ====== TEMA ====== */
+    const THEME_KEY='ft_theme';
+    function applyTheme(t){
+      if(t) document.body.setAttribute('data-theme', t);
       else document.body.removeAttribute('data-theme');
-      const isLight = (document.body.getAttribute('data-theme')==='light') ||
-        (!document.body.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: light)').matches);
-      E.btnTheme.textContent = isLight ? '🌞 Tema' : '🌙 Tema';
-    }
-    function toggleTheme(){
-      const curr = document.body.getAttribute('data-theme');
-      const next = curr === 'light' ? 'dark' : 'light';
-      document.body.setAttribute('data-theme', next);
-      localStorage.setItem(THEME_KEY, next);
-      applyTheme(next);
+      E.btnTheme.textContent = (document.body.getAttribute('data-theme')==='light'||
+        (!document.body.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: light)').matches))
+        ? '🌞 Tema' : '🌙 Tema';
     }
     applyTheme(localStorage.getItem(THEME_KEY));
-    E.btnTheme.addEventListener('click', toggleTheme);
+    E.btnTheme.addEventListener('click', ()=>{ const c=document.body.getAttribute('data-theme'); const n=c==='light'?'dark':'light'; document.body.setAttribute('data-theme',n); localStorage.setItem(THEME_KEY,n); applyTheme(n); });
 
-    /*************** TABS ***************/
+    /* ====== TABS (salva rascunho ao trocar) ====== */
     function setTab(name){
-      E.tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-      E.tabColab.classList.toggle('hidden', name !== 'colab');
-      E.tabAdv .classList.toggle('hidden', name !== 'adv');
-      E.tabRegs.classList.toggle('hidden', name !== 'regs');
-      // ao trocar de aba, preservamos/gravamos rascunho, então nada é perdido
-      if(name === 'regs') loadAdv(); // sempre que abrir registros, recarrega
+      saveDraft(); // << garante persistência ao trocar de tela
+      E.tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab===name));
+      E.tabColab.classList.toggle('hidden', name!=='colab');
+      E.tabAdv.classList.toggle('hidden', name!=='adv');
+      E.tabRegs.classList.toggle('hidden', name!=='regs');
+      if(name==='regs') loadAdv();
+      if(name==='adv') loadDraft();  // << restaura rascunho sempre que voltar
+      window.scrollTo({top:0,behavior:'smooth'});
     }
-    document.querySelector('[data-tab="colab"]').addEventListener('click', ()=>setTab('colab'));
-    document.querySelector('[data-tab="adv"]').addEventListener('click', ()=>setTab('adv'));
-    document.querySelector('[data-tab="regs"]').addEventListener('click', ()=>setTab('regs'));
-    E.homeLink.addEventListener('click', (ev)=>{ ev.preventDefault(); setTab('colab'); window.scrollTo({top:0,behavior:'smooth'}); });
+    document.querySelector('[data-tab="colab"]').onclick=()=>setTab('colab');
+    document.querySelector('[data-tab="adv"]').onclick =()=>setTab('adv');
+    document.querySelector('[data-tab="regs"]').onclick=()=>setTab('regs');
 
-    /*************** AUTH ***************/
-    function setErr(t){ E.msg.textContent = t; E.msg.style.color = '#f87171'; }
-    function setOk(t){ E.msg.textContent = t; E.msg.style.color = '#34d399'; }
-    function setLogged(session){
-      const logged = !!session;
-      document.getElementById('user-email').textContent = logged ? session.user.email : 'Deslogado';
+    /* ====== AUTH ====== */
+    function setLogged(s){
+      const logged=!!s;
+      document.getElementById('user-email').textContent = logged ? s.user.email : 'Deslogado';
       E.viewAuth.classList.toggle('hidden', logged);
-      E.viewApp .classList.toggle('hidden', !logged);
+      E.viewApp.classList.toggle('hidden', !logged);
       E.btnLogout.classList.toggle('hidden', !logged);
     }
-    E.btnLogout.addEventListener('click', async ()=>{ await supabaseClient.auth.signOut(); });
-    E.btnLogin.addEventListener('click', async ()=>{
-      const email=E.email.value.trim(), password=E.password.value;
-      if(!email||!password) return setErr('Preencha e-mail e senha.');
-      const { error } = await supabaseClient.auth.signInWithPassword({ email,password });
-      if(error) return setErr(error.message);
-    });
-    E.btnSignup.addEventListener('click', async ()=>{
-      const email=E.email.value.trim(), password=E.password.value;
-      if(!email||!password) return setErr('Defina um e-mail e uma senha.');
-      const { error } = await supabaseClient.auth.signUp({ email,password });
-      if(error) return setErr(error.message);
-      setOk('Conta criada! (confirmação desativada).');
-    });
-    E.btnRecover.addEventListener('click', async ()=>{
-      const email=E.email.value.trim(); if(!email) return setErr('Digite seu e-mail.');
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-      if(error) return setErr(error.message);
-      setOk('Se existir, enviaremos um link de redefinição.');
-    });
+    E.btnLogout.onclick = async ()=>{ await supabaseClient.auth.signOut(); };
 
-    /*************** COLABORADORES ***************/
-    E.toggleColabForm.addEventListener('click', ()=>E.formColab.classList.toggle('hidden'));
-    E.cancelColabForm.addEventListener('click', ()=>E.formColab.classList.add('hidden'));
+    document.getElementById('btn-login').onclick= async ()=>{
+      const { error } = await supabaseClient.auth.signInWithPassword({ email:E.email.value.trim(), password:E.password.value });
+      if(error){ E.msg.textContent=error.message; E.msg.style.color='#f87171'; }
+    };
+    document.getElementById('btn-signup').onclick = async ()=>{
+      const { error } = await supabaseClient.auth.signUp({ email:E.email.value.trim(), password:E.password.value });
+      E.msg.textContent = error ? error.message : 'Conta criada!';
+      E.msg.style.color = error ? '#f87171' : '#34d399';
+    };
+    document.getElementById('btn-recover').onclick = async ()=>{
+      const email=E.email.value.trim(); if(!email) return (E.msg.textContent='Digite seu e-mail.');
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email,{ redirectTo:location.origin });
+      E.msg.textContent = error ? error.message : 'Se existir, enviaremos o link.';
+      E.msg.style.color = error ? '#f87171' : '#34d399';
+    };
+
+    /* ====== COLABORADORES ====== */
+    E.toggleColabForm.onclick = ()=>E.formColab.classList.toggle('hidden');
+    E.cancelColabForm.onclick = ()=>E.formColab.classList.add('hidden');
+
+    let colabList = [];        // [{id, nome, cpf, ctps, serie}, ...] (ordenado)
+    let advCache = [];         // registros para filtro
 
     async function loadColabs(){
-      // ordena alfabeticamente no servidor (garante consistência)
       const { data, error } = await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
       if(error){ console.error(error); return; }
-      renderColabs(data||[]);
-      fillColabSelect(data||[]);
+      colabList = data||[];
+      renderColabs(colabList);
+      fillColabDatalist(colabList);
+      // se houver rascunho com colaborador_id, restaura
+      const id = E.f_colab_id.value;
+      if(id) setColabById(id);
     }
     function renderColabs(items){
-      E.tblColab.innerHTML = '';
+      E.tblColab.innerHTML='';
       if(!items.length){ E.colabEmpty.classList.remove('hidden'); return; }
       E.colabEmpty.classList.add('hidden');
       for(const c of items){
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${escapeHtml(c.nome)}</td>
-          <td>${escapeHtml(c.cpf||'')}</td>
-          <td>${escapeHtml(c.ctps||'')}</td>
-          <td>${escapeHtml(c.serie||'')}</td>
-          <td>
-            <button class="icon" title="Excluir" aria-label="Excluir">🗑️</button>
-          </td>`;
-        tr.querySelector('button').addEventListener('click', ()=>delColab(c.id));
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${esc(c.nome)}</td><td>${esc(c.cpf||'')}</td><td>${esc(c.ctps||'')}</td><td>${esc(c.serie||'')}</td>
+          <td><button class="icon" title="Excluir">🗑️</button></td>`;
+        tr.querySelector('button').onclick=()=>delColab(c.id);
         E.tblColab.appendChild(tr);
       }
     }
-    function fillColabSelect(items){
-      E.f_colab_id.innerHTML = '';
-      if(!items.length){
-        E.f_colab_id.innerHTML = '<option value="">— Cadastre um colaborador —</option>';
-        E.f_cpf.value = E.f_ctps.value = E.f_serie.value = '';
-        return;
+    function fillColabDatalist(items){
+      // recria sugestões de acordo com o que foi digitado (substring)
+      const q = (E.f_colab_search.value||'').toLowerCase();
+      const filtered = q ? items.filter(c=>c.nome.toLowerCase().includes(q)) : items;
+      E.f_colab_list.innerHTML='';
+      for(const c of filtered){
+        const op=document.createElement('option');
+        op.value=c.nome; // mostrar nome; o id guardamos à parte quando confirmar
+        E.f_colab_list.appendChild(op);
       }
-      for(const c of items){
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = c.nome;
-        opt.dataset.cpf = c.cpf||'';
-        opt.dataset.ctps = c.ctps||'';
-        opt.dataset.serie = c.serie||'';
-        E.f_colab_id.appendChild(opt);
-      }
-      syncColabInfo();
     }
-    function syncColabInfo(){
-      const opt = E.f_colab_id.selectedOptions[0];
-      if(!opt){ E.f_cpf.value = E.f_ctps.value = E.f_serie.value=''; return; }
-      E.f_cpf.value = opt.dataset.cpf || '';
-      E.f_ctps.value = opt.dataset.ctps || '';
-      E.f_serie.value = opt.dataset.serie || '';
-      saveDraft(); // atualiza rascunho
+    function setColabById(id){
+      const c = colabList.find(x=>String(x.id)===String(id));
+      if(!c){ E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; return; }
+      E.f_colab_id.value = c.id;
+      E.f_colab_search.value = c.nome;
+      E.f_cpf.value = c.cpf||''; E.f_ctps.value=c.ctps||''; E.f_serie.value=c.serie||'';
+      saveDraft();
     }
-    E.f_colab_id.addEventListener('change', syncColabInfo);
+    function confirmColabFromSearch(){
+      const name = (E.f_colab_search.value||'').trim().toLowerCase();
+      if(!name){ E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; saveDraft(); return; }
+      const match = colabList.find(c=>c.nome.toLowerCase()===name) || colabList.find(c=>c.nome.toLowerCase().includes(name));
+      if(match) setColabById(match.id);
+    }
+    E.f_colab_search.addEventListener('input', ()=>fillColabDatalist(colabList));
+    E.f_colab_search.addEventListener('change', confirmColabFromSearch);
+    E.f_colab_search.addEventListener('blur', confirmColabFromSearch);
 
     E.formColab.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      const payload = {
-        nome: E.c_nome.value.trim(),
-        cpf:  E.c_cpf.value.trim() || null,
-        ctps: E.c_ctps.value.trim() || null,
-        serie:E.c_serie.value.trim() || null,
-      };
+      const payload={ nome:E.c_nome.value.trim(), cpf:E.c_cpf.value.trim()||null, ctps:E.c_ctps.value.trim()||null, serie:E.c_serie.value.trim()||null };
       if(!payload.nome) return;
-
-      const { data, error } = await supabaseClient
-        .from('colaboradores').insert(payload).select().single();
-      if(error){ alert('Erro ao salvar colaborador: ' + error.message); return; }
-
-      e.target.reset();
-      E.formColab.classList.add('hidden');
+      const { data, error } = await supabaseClient.from('colaboradores').insert(payload).select().single();
+      if(error){ alert('Erro ao salvar colaborador: '+error.message); return; }
+      e.target.reset(); E.formColab.classList.add('hidden');
       await loadColabs();
-      if (data?.id) { E.f_colab_id.value = data.id; syncColabInfo(); }
+      if(data?.id) setColabById(data.id);
     });
-
     async function delColab(id){
-      if(!confirm('Excluir colaborador? (isso não apaga registros antigos)')) return;
+      if(!confirm('Excluir colaborador?')) return;
       await supabaseClient.from('colaboradores').delete().eq('id', id);
-      // fallback de 2s garante tela atualizada
-      setTimeout(loadColabs, 2000);
+      setTimeout(loadColabs, 2000); // fallback
     }
 
-    /*************** REGISTROS ***************/
-    let advCache = []; // mantém em memória para filtro
+    /* ====== REGISTROS ====== */
     async function loadAdv(){
-      // preferência: ordenar alfabeticamente no servidor
-      let query = supabaseClient.from('adv_registros_view').select('*').order('colaborador_nome',{ascending:true});
-      const { data, error } = await query;
+      const { data, error } = await supabaseClient.from('adv_registros_view').select('*').order('colaborador_nome',{ascending:true});
       if(error){ console.error(error); return; }
-      advCache = (data||[]).slice().sort((a,b)=> (a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
+      advCache = (data||[]).slice().sort((a,b)=>(a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
       renderAdv(advCache);
     }
-
     function renderAdv(items){
-      E.tblReg.innerHTML = '';
+      E.tblReg.innerHTML='';
       if(!items.length){ E.empty.classList.remove('hidden'); return; }
       E.empty.classList.add('hidden');
-
       for(const r of items){
-        const tr = document.createElement('tr');
+        const tr=document.createElement('tr');
 
-        const tdNome = document.createElement('td');
+        const tdNome=document.createElement('td');
         if(r.arquivo_path){
-          const { data: pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
-          const a = document.createElement('a');
-          a.href = pub.publicUrl; a.target = '_blank'; a.rel = 'noopener';
-          a.textContent = r.colaborador_nome || r.colaborador || '—';
+          const { data:pub } = supabaseClient.storage.from(BUCKET).getPublicUrl(r.arquivo_path);
+          const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent=r.colaborador_nome||r.colaborador||'—';
           tdNome.appendChild(a);
-        } else {
-          tdNome.textContent = r.colaborador_nome || r.colaborador || '—';
-        }
+        }else tdNome.textContent=r.colaborador_nome||r.colaborador||'—';
 
-        const tdCpf = document.createElement('td');   tdCpf.textContent = r.colaborador_cpf || '—';
-        const tdCtps = document.createElement('td');  tdCtps.textContent = r.colaborador_ctps || '—';
-        const tdSerie = document.createElement('td'); tdSerie.textContent = r.colaborador_serie || '—';
-        const tdOc = document.createElement('td');    tdOc.textContent = r.data_ocorrencia ? new Date(r.data_ocorrencia).toLocaleDateString() : '—';
-        const tdAp = document.createElement('td');    tdAp.textContent = r.data_aplicacao ? new Date(r.data_aplicacao).toLocaleDateString() : '—';
-        const tdTp = document.createElement('td');    tdTp.textContent = r.tipo || '—';
+        const tdCpf=document.createElement('td'); tdCpf.textContent=r.colaborador_cpf||'—';
+        const tdCtps=document.createElement('td'); tdCtps.textContent=r.colaborador_ctps||'—';
+        const tdSerie=document.createElement('td'); tdSerie.textContent=r.colaborador_serie||'—';
+        const tdOc=document.createElement('td'); tdOc.textContent=r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
+        const tdAp=document.createElement('td'); tdAp.textContent=r.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
+        const tdTp=document.createElement('td'); tdTp.textContent=r.tipo||'—';
 
-        const tdAcoes = document.createElement('td');
-        const btnEdit = document.createElement('button'); btnEdit.className='icon'; btnEdit.title='Editar'; btnEdit.textContent='✏️';
-        const btnDel  = document.createElement('button'); btnDel.className ='icon'; btnDel.title ='Excluir'; btnDel.textContent='🗑️';
-        btnEdit.addEventListener('click', ()=>startEdit(r));
-        btnDel .addEventListener('click', ()=>delAdv(r.id, r.arquivo_path));
-        tdAcoes.append(btnEdit, btnDel);
+        const tdAc=document.createElement('td');
+        const wrap=document.createElement('div'); wrap.className='actions-inline';
+        const bEdit=document.createElement('button'); bEdit.className='icon'; bEdit.title='Editar'; bEdit.textContent='✏️';
+        const bDel =document.createElement('button'); bDel .className='icon'; bDel .title='Excluir'; bDel .textContent='🗑️';
+        bEdit.onclick=()=>startEdit(r);
+        bDel .onclick=()=>delAdv(r.id, r.arquivo_path);
+        wrap.append(bEdit,bDel); tdAc.appendChild(wrap);
 
-        tr.append(tdNome,tdCpf,tdCtps,tdSerie,tdOc,tdAp,tdTp,tdAcoes);
+        tr.append(tdNome,tdCpf,tdCtps,tdSerie,tdOc,tdAp,tdTp,tdAc);
         E.tblReg.appendChild(tr);
       }
     }
-
-    // filtro dinâmico
     E.filter.addEventListener('input', ()=>{
-      const f = E.filter.value.toLowerCase().trim();
-      const flt = advCache.filter(x=>{
+      const f=E.filter.value.toLowerCase().trim();
+      renderAdv(advCache.filter(x=>{
         const n=(x.colaborador_nome||x.colaborador||'').toLowerCase();
         const cpf=(x.colaborador_cpf||'').toLowerCase();
         const ctps=(x.colaborador_ctps||'').toLowerCase();
-        return n.includes(f) || cpf.includes(f) || ctps.includes(f);
-      });
-      renderAdv(flt);
+        return n.includes(f)||cpf.includes(f)||ctps.includes(f);
+      }));
     });
-
-    async function delAdv(id, arquivo_path){
-      if(!confirm('Excluir este registro?')) return;
+    async function delAdv(id, path){
+      if(!confirm('Excluir registro?')) return;
       await supabaseClient.from('adv_registros').delete().eq('id', id);
-      if(arquivo_path){ await supabaseClient.storage.from(BUCKET).remove([arquivo_path]); }
-      // fallback de 2s (além do realtime)
+      if(path) await supabaseClient.storage.from(BUCKET).remove([path]);
       setTimeout(loadAdv, 2000);
     }
 
-    /*************** CADASTRO/EDIÇÃO DE ADVERTÊNCIA ***************/
-    function effectiveTipo(){
-      const t = E.f_tipo.value;
-      if(t === 'Verbal') return `Verbal (${E.f_verbal_sub.value})`;
-      return t;
-    }
-    function toggleVerbal(){
-      E.f_verbal_grp.style.display = (E.f_tipo.value === 'Verbal') ? 'block' : 'none';
-    }
+    /* ====== ADVERTÊNCIA (cadastro/edição) ====== */
+    function effectiveTipo(){ return E.f_tipo.value==='Verbal' ? `Verbal (${E.f_verbal_sub.value})` : E.f_tipo.value; }
+    function toggleVerbal(){ E.f_verbal_grp.style.display = (E.f_tipo.value==='Verbal') ? 'block' : 'none'; }
     E.f_tipo.addEventListener('change', ()=>{ toggleVerbal(); saveDraft(); });
     E.f_verbal_sub.addEventListener('change', saveDraft);
 
-    // Salva rascunho (mantém ao trocar de tela)
     function saveDraft(){
-      const draft = {
-        colaborador_id: E.f_colab_id.value || '',
-        data_ocorrencia: E.f_data_oc.value || '',
-        data_aplicacao:  E.f_data_ap.value || '',
-        tipo: E.f_tipo.value || 'Verbal',
-        verbal_sub: E.f_verbal_sub.value || 'Atraso',
+      const draft={
+        colaborador_id:E.f_colab_id.value||'',
+        colaborador_busca:E.f_colab_search.value||'',
+        data_ocorrencia:E.f_data_oc.value||'',
+        data_aplicacao:E.f_data_ap.value||'',
+        tipo:E.f_tipo.value||'Verbal',
+        verbal_sub:E.f_verbal_sub.value||'Atraso',
       };
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     }
     function loadDraft(){
-      const raw = localStorage.getItem(DRAFT_KEY);
+      const raw=localStorage.getItem(DRAFT_KEY);
       if(!raw) return;
       try{
-        const d = JSON.parse(raw);
-        if(d.colaborador_id) E.f_colab_id.value = d.colaborador_id;
-        if(d.data_ocorrencia) E.f_data_oc.value = d.data_ocorrencia;
-        if(d.data_aplicacao)  E.f_data_ap.value = d.data_aplicacao;
-        if(d.tipo) E.f_tipo.value = d.tipo;
-        if(d.verbal_sub) E.f_verbal_sub.value = d.verbal_sub;
-        toggleVerbal(); syncColabInfo();
+        const d=JSON.parse(raw);
+        if(d.colaborador_busca!==undefined) E.f_colab_search.value=d.colaborador_busca;
+        if(d.colaborador_id){ E.f_colab_id.value=d.colaborador_id; setColabById(d.colaborador_id); }
+        if(d.data_ocorrencia) E.f_data_oc.value=d.data_ocorrencia;
+        if(d.data_aplicacao)  E.f_data_ap.value=d.data_aplicacao;
+        if(d.tipo){ E.f_tipo.value=d.tipo; toggleVerbal(); }
+        if(d.verbal_sub) E.f_verbal_sub.value=d.verbal_sub;
       }catch{}
     }
-    // Observa mudanças para manter rascunho
-    [E.f_colab_id,E.f_data_oc,E.f_data_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input', saveDraft));
+    [E.f_colab_search,E.f_data_oc,E.f_data_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input', saveDraft));
 
-    // Novo / Limpar
-    function resetForm(keepDraft=false){
-      E.f_editing_id.value = '';
-      if(!keepDraft){
-        localStorage.removeItem(EDIT_KEY);
-        localStorage.removeItem(DRAFT_KEY);
-      }
-      const today = new Date().toISOString().slice(0,10);
-      E.f_data_oc.value = today; E.f_data_ap.value = today;
-      E.f_tipo.value = 'Verbal'; E.f_verbal_sub.value = 'Atraso';
-      E.f_file.value = '';
+    function resetForm(){
+      E.f_editing_id.value=''; localStorage.removeItem(EDIT_KEY);
+      const today=new Date().toISOString().slice(0,10);
+      E.f_colab_search.value=''; E.f_colab_id.value='';
+      E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
+      E.f_data_oc.value=today; E.f_data_ap.value=today;
+      E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Atraso'; E.f_file.value='';
       toggleVerbal(); saveDraft();
     }
-    document.getElementById('btn-new-adv').addEventListener('click', ()=>{ resetForm(false); setTab('adv'); });
-    document.getElementById('btn-clear-adv').addEventListener('click', ()=>resetForm(false));
+    E.btnNewAdv.onclick = ()=>{ resetForm(); setTab('adv'); };
+    E.btnClearAdv.onclick = ()=>resetForm();
 
-    // Começar edição a partir da listagem
     function startEdit(r){
       setTab('adv');
-      E.f_editing_id.value = r.id;
-      localStorage.setItem(EDIT_KEY, r.id);
-      // Preenche
-      if(r.colaborador_id){ E.f_colab_id.value = r.colaborador_id; }
-      E.f_data_oc.value = r.data_ocorrencia?.substring(0,10) || '';
-      E.f_data_ap.value = r.data_aplicacao?.substring(0,10) || '';
-      // tipo pode vir "Verbal (Atraso)" -> separa
-      const m = /^Verbal\s*\((.+)\)$/.exec(r.tipo||'');
-      if(m){ E.f_tipo.value='Verbal'; E.f_verbal_sub.value = m[1]; }
-      else { E.f_tipo.value = r.tipo || 'Verbal'; }
-      toggleVerbal(); syncColabInfo(); saveDraft();
-      window.scrollTo({top:0,behavior:'smooth'});
+      E.f_editing_id.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
+      if(r.colaborador_id) setColabById(r.colaborador_id); else {E.f_colab_search.value=r.colaborador_nome||''; confirmColabFromSearch();}
+      E.f_data_oc.value=r.data_ocorrencia?.substring(0,10)||'';
+      E.f_data_ap.value=r.data_aplicacao?.substring(0,10)||'';
+      const m=/^Verbal\s*\((.+)\)$/.exec(r.tipo||'');
+      if(m){ E.f_tipo.value='Verbal'; E.f_verbal_sub.value=m[1]; } else { E.f_tipo.value=r.tipo||'Verbal'; }
+      toggleVerbal(); saveDraft();
     }
 
-    // Se estava editando e saiu da aba, preserva
-    function restoreEditing(){
-      const id = localStorage.getItem(EDIT_KEY);
-      if(!id) { loadDraft(); return; }
-      // mantém apenas o ID para informar no submit; o rascunho preencheu o resto
-      E.f_editing_id.value = id;
-      loadDraft();
-    }
-
-    // Submit (insert ou update)
     E.formAdv.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      const colaborador_id = E.f_colab_id.value || null;
-      if(!colaborador_id) return alert('Selecione um colaborador.');
-
-      const nomeSnapshot = E.f_colab_id.selectedOptions[0]?.textContent || null;
-
-      const payload = {
-        colaborador_id,
-        colaborador: nomeSnapshot,
-        data_ocorrencia: E.f_data_oc.value,
-        data_aplicacao:  E.f_data_ap.value,
-        tipo:            effectiveTipo(),
-      };
-
-      // upload opcional
-      const file = E.f_file.files[0];
-      let newPath = null;
-      if (file){
-        const ext = (file.name.split('.').pop() || '').toLowerCase();
-        if(!['png','pdf'].includes(ext)) return alert('Envie um PNG ou PDF.');
-        const path = `${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
-        const { error: upErr } = await supabaseClient.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert:false });
-        if(upErr){ alert('Falha no upload: '+upErr.message); return; }
-        newPath = path;
-        payload.arquivo_path = path;
+      if(!E.f_colab_id.value) return alert('Selecione um colaborador válido.');
+      const nome = E.f_colab_search.value || colabList.find(c=>String(c.id)===String(E.f_colab_id.value))?.nome || null;
+      const payload={ colaborador_id:E.f_colab_id.value, colaborador:nome, data_ocorrencia:E.f_data_oc.value, data_aplicacao:E.f_data_ap.value, tipo:effectiveTipo() };
+      const file=E.f_file.files[0];
+      if(file){
+        const ext=(file.name.split('.').pop()||'').toLowerCase();
+        if(!['png','pdf'].includes(ext)) return alert('Envie PNG ou PDF.');
+        const path=`${crypto.randomUUID?.()||Math.random().toString(36).slice(2)}/${Date.now()}_${file.name}`;
+        const { error:upErr } = await supabaseClient.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
+        if(upErr) return alert('Falha no upload: '+upErr.message);
+        payload.arquivo_path=path;
       }
 
       const editingId = E.f_editing_id.value || localStorage.getItem(EDIT_KEY) || '';
-      if(editingId){
-        const { error } = await supabaseClient.from('adv_registros').update(payload).eq('id', editingId);
-        if(error){ alert('Erro ao atualizar: '+error.message); return; }
-      }else{
-        const { error } = await supabaseClient.from('adv_registros').insert(payload);
-        if(error){ alert('Erro ao salvar: '+error.message); return; }
-      }
+      if(editingId){ await supabaseClient.from('adv_registros').update(payload).eq('id', editingId); }
+      else { await supabaseClient.from('adv_registros').insert(payload); }
 
-      // Vai para Registros
-      setTab('regs');
-      await loadAdv();
-
-      // Limpa estado de edição, mas mantém um rascunho novo pronto
-      resetForm(false);
-      localStorage.removeItem(EDIT_KEY);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTab('regs'); await loadAdv();
+      resetForm(); // prepara para próximo
     });
 
-    /*************** UTILS & INIT ***************/
-    function escapeHtml(s){return (s||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-
-    // Evita assinaturas duplicadas
-    let rtBound = false;
-    async function bindRealtime(){
-      if(rtBound) return; rtBound = true;
-      supabaseClient.channel('colabs-rt')
-        .on('postgres_changes', { event:'*', schema:'public', table:'colaboradores' }, ()=>{ loadColabs(); setTimeout(loadColabs, 2000); })
-        .subscribe();
-      supabaseClient.channel('adv-rt')
-        .on('postgres_changes', { event:'*', schema:'public', table:'adv_registros' }, ()=>{ loadAdv(); setTimeout(loadAdv, 2000); })
-        .subscribe();
+    /* ====== INIT ====== */
+    function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+    let rtBound=false;
+    async function bindRt(){
+      if(rtBound) return; rtBound=true;
+      supabaseClient.channel('colabs-rt').on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},()=>{loadColabs(); setTimeout(loadColabs,2000);}).subscribe();
+      supabaseClient.channel('adv-rt').on('postgres_changes',{event:'*',schema:'public',table:'adv_registros'},()=>{loadAdv(); setTimeout(loadAdv,2000);}).subscribe();
     }
 
     (async function init(){
-      const { data: { session } } = await supabaseClient.auth.getSession();
+      const { data:{ session } } = await supabaseClient.auth.getSession();
       setLogged(session);
+      const today=new Date().toISOString().slice(0,10);
+      E.f_data_oc.value=today; E.f_data_ap.value=today; toggleVerbal();
 
-      // Datas padrão
-      const today = new Date().toISOString().slice(0,10);
-      E.f_data_oc.value = today; E.f_data_ap.value = today;
-      toggleVerbal();
-
-      if(session){
-        setTab('colab');              // Colaboradores como tela principal
-        await loadColabs();
-        await loadAdv();
-        bindRealtime();
-        restoreEditing();             // mantém rascunho/edição se existirem
-      }
-
-      supabaseClient.auth.onAuthStateChange((_e, s)=>{
-        setLogged(s);
-        if(s){ loadColabs(); loadAdv(); bindRealtime(); setTab('colab'); restoreEditing(); }
-      });
+      if(session){ setTab('colab'); await loadColabs(); await loadAdv(); bindRt(); loadDraft(); }
+      supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); } });
     })();
   </script>
 </body>
