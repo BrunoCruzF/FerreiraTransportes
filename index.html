@@ -157,7 +157,7 @@
       <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
     </section>
 
-    <!-- ADVERTÊNCIAS (cadastro/edição) -->
+    <!-- ADVERTÊNCIAS -->
     <section id="tab-adv" class="card hidden">
       <div class="row" style="justify-content:space-between;align-items:center">
         <h2 style="margin:0">Cadastrar Advertência</h2>
@@ -234,8 +234,8 @@
     const BUCKET='adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY='adv_form_d7';
-    const EDIT_KEY='adv_edit_id_d7';
+    const DRAFT_KEY='adv_form_d8';
+    const EDIT_KEY='adv_edit_id_d8';
 
     /* === ELEMENTOS === */
     const E={
@@ -257,7 +257,7 @@
 
     function $(s){return document.querySelector(s)}
     function $$(s){return document.querySelectorAll(s)}
-    function esc(s){return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+    function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
     const wait = ms => new Promise(r=>setTimeout(r,ms));
 
     /* === Toaster === */
@@ -279,13 +279,11 @@
       });
     }
 
-    /* === Debounce + Rascunho (sem spam de toast) === */
+    /* === Debounce + Rascunho silencioso === */
     function debounce(fn, ms){
       let t; const d=function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms); };
       d.flush=()=>{ clearTimeout(t); fn(); }; return d;
     }
-
-    // salva (sem toast)
     function saveDraft(){
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         colaborador_id:E.f_colab_id.value||'', colaborador_busca:E.f_search.value||'',
@@ -294,16 +292,11 @@
       }));
     }
     const saveDraftDebounced = debounce(saveDraft, 400);
-
-    // quando quiser avisar, chamo isso (aplica cooldown)
     let lastDraftToast = 0;
     function saveDraftNotify(){
       saveDraft();
-      const now = Date.now();
-      if (now - lastDraftToast > 8000) { // 8s de intervalo mínimo
-        toast('Rascunho salvo','ok',1500);
-        lastDraftToast = now;
-      }
+      const now=Date.now();
+      if(now-lastDraftToast>8000){ toast('Rascunho salvo','ok',1500); lastDraftToast=now; }
     }
 
     /* === Tema === */
@@ -319,7 +312,7 @@
     /* === Tabs === */
     function setTab(n){
       saveDraftDebounced.flush?.();
-      saveDraftNotify(); // notifica (com cooldown) apenas ao trocar de aba
+      saveDraftNotify(); // notifica ao trocar de aba (com cooldown)
       E.tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
       E.tabColab.classList.toggle('hidden',n!=='colab');
       E.tabAdv.classList.toggle('hidden',n!=='adv');
@@ -360,7 +353,7 @@
     async function loadColabs(){
       const {data,error}=await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
       if(error){console.error(error);return;}
-      colabList=data||[];
+      colabList=Array.isArray(data)?data:[];
       renderColabs(colabList);
       refreshCombo();
       if(E.f_colab_id.value) setColabById(E.f_colab_id.value);
@@ -372,12 +365,12 @@
       E.colabEmpty.classList.add('hidden');
       for(const c of items){
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${esc(c.nome)}</td><td>${esc(c.cpf||'')}</td><td>${esc(c.ctps||'')}</td><td>${esc(c.serie||'')}</td>
+        tr.innerHTML=`<td>${esc(c?.nome)}</td><td>${esc(c?.cpf||'')}</td><td>${esc(c?.ctps||'')}</td><td>${esc(c?.serie||'')}</td>
         <td><button class="icon danger" title="Excluir">🗑️</button></td>`;
         tr.querySelector('button').onclick=async()=>{
           const ok=await confirmModal({
             title:'Excluir colaborador',
-            body:`<p>Remover <b>${esc(c.nome)}</b>?</p><p class="muted">Atenção: não remove advertências já lançadas.</p>`,
+            body:`<p>Remover <b>${esc(c?.nome)}</b>?</p><p class="muted">Atenção: não remove advertências já lançadas.</p>`,
             okText:'Sim, excluir', okClass:'danger'
           });
           if(!ok) return;
@@ -388,37 +381,70 @@
       }
     }
 
-    // === Combobox (Colaborador) ===
+    // === Combobox (Colaborador) — BLINDADO ===
     let comboIndex=-1;
+
+    function normalizeStr(v){return (v??'').toString();}
+    function lower(v){return normalizeStr(v).toLowerCase();}
+    function digits(v){return normalizeStr(v).replace(/\D/g,'');}
+
     function refreshCombo(){
-      const q=(E.f_search.value||'').toLowerCase().trim();
-      const list=q ? colabList.filter(c => (c.nome||'').toLowerCase().includes(q) || (c.cpf||'').replace(/\D/g,'').includes(q.replace(/\D/g,''))) : colabList;
-      const top=list.slice(0,40);
-      E.comboList.innerHTML='';
-      if(!top.length){E.comboList.classList.add('hidden'); return;}
-      for(const [i,c] of top.entries()){
-        const div=document.createElement('div'); div.className='combo-item'; div.dataset.id=c.id;
-        div.innerHTML=`<span>${esc(c.nome)}</span><small>${esc(c.cpf||'—')}</small>`;
-        div.onclick=()=>setColabById(c.id,true);
-        E.comboList.appendChild(div);
+      try{
+        const qRaw = normalizeStr(E.f_search.value);
+        const q = lower(qRaw.trim());
+        const qd = digits(qRaw);
+
+        const list = (Array.isArray(colabList)?colabList:[]).filter(c=>{
+          const nomeOk = lower(c?.nome).includes(q);
+          const cpfOk  = digits(c?.cpf).includes(qd);
+          const ctpsOk = digits(c?.ctps).includes(qd);
+          return q ? (nomeOk || cpfOk || ctpsOk) : true;
+        });
+
+        const top=list.slice(0,40);
+        E.comboList.innerHTML='';
+        if(!top.length){ E.comboList.classList.add('hidden'); return; }
+
+        for(const [i,c] of top.entries()){
+          const div=document.createElement('div'); div.className='combo-item'; div.dataset.id=c.id;
+          div.innerHTML=`<span>${esc(c?.nome||'—')}</span><small>${esc(c?.cpf||'—')}</small>`;
+          div.onclick=()=>setColabById(c.id,true);
+          E.comboList.appendChild(div);
+        }
+        comboIndex=-1; E.comboList.classList.remove('hidden');
+      }catch(err){
+        console.error('refreshCombo error:', err);
+        // Não mexe no que o usuário digitou; só fecha a lista para evitar flicker
+        E.comboList.classList.add('hidden');
       }
-      comboIndex=-1; E.comboList.classList.remove('hidden');
     }
+
     function setComboActive(i){
       const items=[...E.comboList.children]; items.forEach(el=>el.classList.remove('active'));
       if(i>=0 && i<items.length){ items[i].classList.add('active'); items[i].scrollIntoView({block:'nearest'}); comboIndex=i; }
     }
+
     function setColabById(id, closeList=false){
-      const c=colabList.find(x=>String(x.id)===String(id)); if(!c){E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';return;}
-      E.f_colab_id.value=c.id; E.f_search.value=c.nome; E.f_cpf.value=c.cpf||''; E.f_ctps.value=c.ctps||''; E.f_serie.value=c.serie||'';
-      if(closeList) E.comboList.classList.add('hidden'); saveDraftDebounced();
+      const c=(Array.isArray(colabList)?colabList:[]).find(x=>String(x?.id)===String(id));
+      if(!c){ /* não limpa o que digitou; só zera os campos complementares */ E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; return; }
+      E.f_colab_id.value=c.id;
+      E.f_search.value=c?.nome||'';
+      E.f_cpf.value=c?.cpf||'';
+      E.f_ctps.value=c?.ctps||'';
+      E.f_serie.value=c?.serie||'';
+      if(closeList) E.comboList.classList.add('hidden');
+      saveDraftDebounced();
     }
+
     function resolveColab(){
-      const name=(E.f_search.value||'').trim().toLowerCase();
-      if(!name){E.f_colab_id.value='';E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';saveDraftDebounced();return;}
-      const ex=colabList.find(c=>c.nome?.toLowerCase()===name)||colabList.find(c=>c.nome?.toLowerCase().startsWith(name))||colabList.find(c=>c.nome?.toLowerCase().includes(name));
+      const name=lower(E.f_search.value?.trim());
+      if(!name){ E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value=''; saveDraftDebounced(); return; }
+      const ex=(Array.isArray(colabList)?colabList:[]).find(c=>lower(c?.nome)===name)
+            || (Array.isArray(colabList)?colabList:[]).find(c=>lower(c?.nome).startsWith(name))
+            || (Array.isArray(colabList)?colabList:[]).find(c=>lower(c?.nome).includes(name));
       if(ex) setColabById(ex.id,true);
     }
+
     E.f_search.addEventListener('input',()=>{refreshCombo(); saveDraftDebounced();});
     E.f_search.addEventListener('focus',refreshCombo);
     document.addEventListener('click',e=>{ if(!E.comboList.contains(e.target) && e.target!==E.f_search) E.comboList.classList.add('hidden'); });
@@ -449,7 +475,7 @@
     async function loadAdv(){
       const {data,error}=await supabaseClient.from('adv_registros_view').select('*');
       if(error){console.error(error);return;}
-      advCache=(data||[]).slice().sort((a,b)=>(a.colaborador_nome||'').localeCompare(b.colaborador_nome||''));
+      advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
       renderGrouped(advCache);
     }
 
@@ -460,7 +486,7 @@
 
       const map=new Map();
       for(const r of items){
-        const k=r.colaborador_nome||r.colaborador||'—';
+        const k=r?.colaborador_nome||r?.colaborador||'—';
         if(!map.has(k)) map.set(k,[]);
         map.get(k).push(r);
       }
@@ -468,7 +494,7 @@
       for(const [nome,arr] of map){
         const grp=document.createElement('div'); grp.className='grp';
         const head=document.createElement('div'); head.className='grp-h';
-        head.innerHTML=`<div><strong>${esc(nome)}</strong> <small class="muted">• ${esc(arr[0].colaborador_cpf||'—')} • CTPS ${esc(arr[0].colaborador_ctps||'—')} • Série ${esc(arr[0].colaborador_serie||'—')}</small></div><div><span class="pill">${arr.length}</span></div>`;
+        head.innerHTML=`<div><strong>${esc(nome)}</strong> <small class="muted">• ${esc(arr[0]?.colaborador_cpf||'—')} • CTPS ${esc(arr[0]?.colaborador_ctps||'—')} • Série ${esc(arr[0]?.colaborador_serie||'—')}</small></div><div><span class="pill">${arr.length}</span></div>`;
         const body=document.createElement('div'); body.className='grp-b';
         const table=document.createElement('table'); table.style.marginTop='10px';
         table.innerHTML=`<thead><tr><th>Ocorrência</th><th>Aplicação</th><th>Tipo</th><th>Anexo</th><th>Ações</th></tr></thead>`;
@@ -476,11 +502,11 @@
 
         for(const r of arr){
           const tr=document.createElement('tr');
-          const tdo=document.createElement('td'); tdo.textContent=r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
-          const tda=document.createElement('td'); tda.textContent=r.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
-          const ttt=document.createElement('td'); const subt=r.verbal_motivo||null; ttt.textContent=r.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
+          const tdo=document.createElement('td'); tdo.textContent=r?.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
+          const tda=document.createElement('td'); tda.textContent=r?.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
+          const ttt=document.createElement('td'); const subt=r?.verbal_motivo||null; ttt.textContent=r?.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
           const tan=document.createElement('td');
-          if(r.arquivo_path){
+          if(r?.arquivo_path){
             const {data:pub}=supabaseClient.storage.from('adv_docs').getPublicUrl(r.arquivo_path);
             const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent='baixar'; tan.appendChild(a);
           } else tan.textContent='—';
@@ -496,16 +522,16 @@
       }
     }
 
-    E.filter.oninput=()=>{const f=E.filter.value.toLowerCase().trim();
-      const filtered=advCache.filter(x=> (x.colaborador_nome||x.colaborador||'').toLowerCase().includes(f) || (x.colaborador_cpf||'').toLowerCase().includes(f) || (x.colaborador_ctps||'').toLowerCase().includes(f) );
+    E.filter.oninput=()=>{const f=(E.filter.value||'').toLowerCase().trim();
+      const filtered=(advCache||[]).filter(x=> ((x?.colaborador_nome||x?.colaborador||'').toLowerCase().includes(f)) || ((x?.colaborador_cpf||'').toLowerCase().includes(f)) || ((x?.colaborador_ctps||'').toLowerCase().includes(f)) );
       renderGrouped(filtered);
     };
 
     async function delAdvConfirm(r){
       const ok=await confirmModal({
         title:'Excluir advertência',
-        body:`<p>Excluir advertência de <b>${esc(r.colaborador_nome||r.colaborador||'—')}</b>?</p>
-              <p class="muted">Ocorrência: ${r.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—'}</p>`,
+        body:`<p>Excluir advertência de <b>${esc(r?.colaborador_nome||r?.colaborador||'—')}</b>?</p>
+              <p class="muted">Ocorrência: ${r?.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—'}</p>`,
         okText:'Sim, excluir', okClass:'danger'
       });
       if(!ok) return;
@@ -551,9 +577,9 @@
 
     function startEdit(r){
       setTab('adv'); E.f_edit.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
-      if(r.colaborador_id) setColabById(r.colaborador_id,true); else {E.f_search.value=r.colaborador_nome||''; resolveColab();}
-      E.f_oc.value=r.data_ocorrencia?.substring(0,10)||''; E.f_ap.value=r.data_aplicacao?.substring(0,10)||'';
-      if(r.tipo==='Verbal'){E.f_tipo.value='Verbal'; E.f_verbal_sub.value=r.verbal_motivo||'Atraso';} else {E.f_tipo.value=r.tipo||'Verbal';}
+      if(r?.colaborador_id) setColabById(r.colaborador_id,true); else {E.f_search.value=r?.colaborador_nome||''; resolveColab();}
+      E.f_oc.value=r?.data_ocorrencia?.substring(0,10)||''; E.f_ap.value=r?.data_aplicacao?.substring(0,10)||'';
+      if(r?.tipo==='Verbal'){E.f_tipo.value='Verbal'; E.f_verbal_sub.value=r?.verbal_motivo||'Atraso';} else {E.f_tipo.value=r?.tipo||'Verbal';}
       toggleVerbal(); saveDraftDebounced();
     }
 
@@ -569,7 +595,7 @@
       if(!E.f_colab_id.value) resolveColab();
       if(!E.f_colab_id.value) return alert('Selecione um colaborador válido.');
 
-      const nome=E.f_search.value || (colabList.find(c=>String(c.id)===String(E.f_colab_id.value))?.nome) || null;
+      const nome=E.f_search.value || ((colabList||[]).find(c=>String(c?.id)===String(E.f_colab_id.value))?.nome) || null;
       const payload={
         colaborador_id:E.f_colab_id.value,
         colaborador:nome,
