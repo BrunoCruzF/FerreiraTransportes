@@ -237,16 +237,19 @@
     const BUCKET='adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY='adv_form_d9';
-    const EDIT_KEY='adv_edit_id_d9';
+    const DRAFT_KEY='adv_form_d10';
+    const EDIT_KEY='adv_edit_id_d10';
 
     /* === HELPERS === */
     function $(s){return document.querySelector(s)}
     function $$(s){return document.querySelectorAll(s)}
     function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
     const wait = ms => new Promise(r=>setTimeout(r,ms));
-    const lower = v => (v??'').toString().toLowerCase();
-    const digits = v => (v??'').toString().replace(/\D/g,'');
+
+    // normalização para busca (remove acentos)
+    const fold  = v => (v ?? '').toString().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+    const lower = v => fold(v).toLowerCase();
+    const digits = v => (v ?? '').toString().replace(/\D/g,'');
 
     /* === Toaster === */
     const toasts = $('#toasts');
@@ -323,7 +326,7 @@
       E.tabAdv.classList.toggle('hidden',n!=='adv');
       E.tabRegs.classList.toggle('hidden',n!=='regs');
       if(n==='regs') loadAdv();
-      if(n==='adv')  loadDraft();
+      if(n==='adv')  { loadDraft(); refreshCombo(); }
       window.scrollTo({top:0,behavior:'smooth'});
     }
     document.querySelector('[data-tab="colab"]').onclick=()=>setTab('colab');
@@ -388,26 +391,37 @@
 
     /* === Combobox Colaborador (blindado) === */
     let comboIndex=-1;
+
     function refreshCombo(){
       try{
-        const qRaw=E.f_search.value??''; const q=lower(qRaw.trim()); const qd=digits(qRaw);
-        const list=(colabList||[]).filter(c=>{
-          const nomeOk=lower(c?.nome).includes(q);
-          const cpfOk =digits(c?.cpf).includes(qd);
-          const ctpsOk=digits(c?.ctps).includes(qd);
-          return q ? (nomeOk||cpfOk||ctpsOk) : true;
+        const qRaw = E.f_search.value ?? '';
+        const q    = lower(qRaw.trim());
+        const qd   = digits(qRaw);
+
+        const base = Array.isArray(colabList) ? colabList : [];
+        const list = base.filter(c=>{
+          const nome = lower(c?.nome);
+          const cpf  = digits(c?.cpf);
+          const ctps = digits(c?.ctps);
+          return q ? (nome.includes(q) || (qd && (cpf.includes(qd) || ctps.includes(qd)))) : true;
         });
-        const top=list.slice(0,40);
+
         E.comboList.innerHTML='';
-        if(!top.length){E.comboList.classList.add('hidden');return;}
-        for(const [i,c] of top.entries()){
+        if(!list.length){
+          E.comboList.innerHTML = `<div class="combo-item" style="justify-content:center;color:var(--muted)">Nenhum resultado</div>`;
+          E.comboList.classList.remove('hidden');
+          return;
+        }
+
+        const top=list.slice(0,40);
+        for(const c of top){
           const div=document.createElement('div'); div.className='combo-item'; div.dataset.id=c.id;
           div.innerHTML=`<span>${esc(c?.nome||'—')}</span><small>${esc(c?.cpf||'—')}</small>`;
           div.onclick=()=>setColabById(c.id,true);
           E.comboList.appendChild(div);
         }
         comboIndex=-1; E.comboList.classList.remove('hidden');
-      }catch(err){ console.error(err); E.comboList.classList.add('hidden'); }
+      }catch(err){ console.error('refreshCombo error:', err); E.comboList.classList.add('hidden'); }
     }
     function setComboActive(i){
       const items=[...E.comboList.children]; items.forEach(el=>el.classList.remove('active'));
@@ -427,9 +441,13 @@
             || (colabList||[]).find(c=>lower(c?.nome).includes(name));
       if(ex) setColabById(ex.id,true);
     }
-    E.f_search.addEventListener('input',()=>{refreshCombo(); saveDraftDebounced();});
+    ['input','keyup','change'].forEach(evt=>{
+      E.f_search.addEventListener(evt,()=>{ refreshCombo(); saveDraftDebounced(); });
+    });
     E.f_search.addEventListener('focus',refreshCombo);
-    document.addEventListener('click',e=>{ if(!E.comboList.contains(e.target) && e.target!==E.f_search) E.comboList.classList.add('hidden'); });
+    document.addEventListener('click',e=>{
+      if(!E.comboList.contains(e.target) && e.target!==E.f_search) E.comboList.classList.add('hidden');
+    });
     E.f_search.addEventListener('keydown',e=>{
       const items=[...E.comboList.children];
       if(['ArrowDown','ArrowUp','Enter','Escape'].includes(e.key||'')){
@@ -609,7 +627,7 @@
       if((e.ctrlKey||e.metaKey) && key==='s'){
         if(!E.tabAdv.classList.contains('hidden')){ e.preventDefault(); E.formAdv.requestSubmit(); }
       }
-      // REMOVIDO: atalho "n" para nova advertência (atrapalhava a digitação do nome)
+      // atalho "n" removido para não atrapalhar digitação do nome
     });
 
     /* === Init + realtime === */
