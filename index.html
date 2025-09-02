@@ -234,8 +234,8 @@
     const BUCKET='adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY='adv_form_d6';
-    const EDIT_KEY='adv_edit_id_d6';
+    const DRAFT_KEY='adv_form_d7';
+    const EDIT_KEY='adv_edit_id_d7';
 
     /* === ELEMENTOS === */
     const E={
@@ -279,20 +279,32 @@
       });
     }
 
-    /* === Debounce + Rascunho (definido ANTES de setTab) === */
+    /* === Debounce + Rascunho (sem spam de toast) === */
     function debounce(fn, ms){
       let t; const d=function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms); };
       d.flush=()=>{ clearTimeout(t); fn(); }; return d;
     }
+
+    // salva (sem toast)
     function saveDraft(){
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         colaborador_id:E.f_colab_id.value||'', colaborador_busca:E.f_search.value||'',
         data_ocorrencia:E.f_oc.value||'', data_aplicacao:E.f_ap.value||'',
         tipo:E.f_tipo.value||'Verbal', verbal_sub:E.f_verbal_sub.value||'Atraso'
       }));
-      toast('Rascunho salvo','ok',1200);
     }
-    const saveDraftDebounced = debounce(saveDraft, 300);
+    const saveDraftDebounced = debounce(saveDraft, 400);
+
+    // quando quiser avisar, chamo isso (aplica cooldown)
+    let lastDraftToast = 0;
+    function saveDraftNotify(){
+      saveDraft();
+      const now = Date.now();
+      if (now - lastDraftToast > 8000) { // 8s de intervalo mínimo
+        toast('Rascunho salvo','ok',1500);
+        lastDraftToast = now;
+      }
+    }
 
     /* === Tema === */
     const THEME_KEY='ft_theme';
@@ -306,8 +318,8 @@
 
     /* === Tabs === */
     function setTab(n){
-      saveDraftDebounced.flush?.(); // já existe
-      saveDraft();
+      saveDraftDebounced.flush?.();
+      saveDraftNotify(); // notifica (com cooldown) apenas ao trocar de aba
       E.tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
       E.tabColab.classList.toggle('hidden',n!=='colab');
       E.tabAdv.classList.toggle('hidden',n!=='adv');
@@ -508,7 +520,7 @@
     }
 
     /* === Advertência (cadastro/edição) === */
-    function effectiveTipo(){ return E.f_tipo.value; } // tipo puro
+    function effectiveTipo(){ return E.f_tipo.value; }
     function toggleVerbal(){ E.f_verbal_grp.style.display=(E.f_tipo.value==='Verbal')?'block':'none'; }
     E.f_tipo.onchange=()=>{ toggleVerbal(); saveDraftDebounced(); }
     E.f_verbal_sub.onchange=saveDraftDebounced;
@@ -595,11 +607,9 @@
 
     /* === Atalhos === */
     window.addEventListener('keydown',e=>{
-      // Cmd/Ctrl + S
       if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
         if(!E.tabAdv.classList.contains('hidden')){ e.preventDefault(); E.formAdv.requestSubmit(); }
       }
-      // tecla N (nova advertência)
       if(!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase()==='n'){
         if(!E.viewApp.classList.contains('hidden')){ e.preventDefault(); E.btnNew.click(); }
       }
