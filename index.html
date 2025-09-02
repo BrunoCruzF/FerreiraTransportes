@@ -234,8 +234,8 @@
     const BUCKET='adv_docs';
     const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    const DRAFT_KEY='adv_form_d5';
-    const EDIT_KEY='adv_edit_id_d5';
+    const DRAFT_KEY='adv_form_d6';
+    const EDIT_KEY='adv_edit_id_d6';
 
     /* === ELEMENTOS === */
     const E={
@@ -279,6 +279,21 @@
       });
     }
 
+    /* === Debounce + Rascunho (definido ANTES de setTab) === */
+    function debounce(fn, ms){
+      let t; const d=function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms); };
+      d.flush=()=>{ clearTimeout(t); fn(); }; return d;
+    }
+    function saveDraft(){
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        colaborador_id:E.f_colab_id.value||'', colaborador_busca:E.f_search.value||'',
+        data_ocorrencia:E.f_oc.value||'', data_aplicacao:E.f_ap.value||'',
+        tipo:E.f_tipo.value||'Verbal', verbal_sub:E.f_verbal_sub.value||'Atraso'
+      }));
+      toast('Rascunho salvo','ok',1200);
+    }
+    const saveDraftDebounced = debounce(saveDraft, 300);
+
     /* === Tema === */
     const THEME_KEY='ft_theme';
     function applyTheme(t){
@@ -291,13 +306,14 @@
 
     /* === Tabs === */
     function setTab(n){
-      saveDraftDebounced.flush?.(); saveDraft(); // garante salvar
+      saveDraftDebounced.flush?.(); // já existe
+      saveDraft();
       E.tabBtns.forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
       E.tabColab.classList.toggle('hidden',n!=='colab');
       E.tabAdv.classList.toggle('hidden',n!=='adv');
       E.tabRegs.classList.toggle('hidden',n!=='regs');
       if(n==='regs') loadAdv();
-      if(n==='adv') loadDraft();
+      if(n==='adv')  loadDraft();
       window.scrollTo({top:0,behavior:'smooth'});
     }
     document.querySelector('[data-tab="colab"]').onclick=()=>setTab('colab');
@@ -496,20 +512,6 @@
     function toggleVerbal(){ E.f_verbal_grp.style.display=(E.f_tipo.value==='Verbal')?'block':'none'; }
     E.f_tipo.onchange=()=>{ toggleVerbal(); saveDraftDebounced(); }
     E.f_verbal_sub.onchange=saveDraftDebounced;
-
-    // Debounce simples
-    function debounce(fn,ms){
-      let t; const d=function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),ms); d.flush=()=>{clearTimeout(t); fn.apply(this,args)}; }; return d;
-    }
-    function saveDraft(){
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        colaborador_id:E.f_colab_id.value||'', colaborador_busca:E.f_search.value||'',
-        data_ocorrencia:E.f_oc.value||'', data_aplicacao:E.f_ap.value||'',
-        tipo:E.f_tipo.value||'Verbal', verbal_sub:E.f_verbal_sub.value||'Atraso'
-      }));
-      toast('Rascunho salvo', 'ok', 1200);
-    }
-    const saveDraftDebounced = debounce(saveDraft, 300);
 
     function loadDraft(){
       const raw=localStorage.getItem(DRAFT_KEY); if(!raw) return;
