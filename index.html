@@ -478,6 +478,11 @@
       advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
       renderGrouped(advCache);
     }
+    function formatDateLocal(dateStr){
+      if(!dateStr) return '—';
+      const [y,m,d] = dateStr.split('T')[0].split('-');
+      return `${d}/${m}/${y}`;
+    }
     function renderGrouped(items){
       E.grpContainer.innerHTML='';
       if(!items.length){E.empty.classList.remove('hidden');return;}
@@ -498,8 +503,8 @@
         const tb=document.createElement('tbody');
         for(const r of arr){
           const tr=document.createElement('tr');
-          const tdo=document.createElement('td'); tdo.textContent=r?.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—';
-          const tda=document.createElement('td'); tda.textContent=r?.data_aplicacao?new Date(r.data_aplicacao).toLocaleDateString():'—';
+          const tdo=document.createElement('td'); tdo.textContent=formatDateLocal(r.data_ocorrencia);
+          const tda=document.createElement('td'); tda.textContent=formatDateLocal(r.data_aplicacao);
           const ttt=document.createElement('td'); const subt=r?.verbal_motivo||null; ttt.textContent=r?.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
           const tan=document.createElement('td');
           if(r?.arquivo_path){
@@ -649,3 +654,4 @@
   </script>
 </body>
 </html>
+
