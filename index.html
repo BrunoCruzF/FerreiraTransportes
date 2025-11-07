@@ -244,6 +244,40 @@
     function $(s){return document.querySelector(s)}
     function $$(s){return document.querySelectorAll(s)}
     function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+    // === FUNÇÕES DE DATA (corrigem o fuso horário) ===
+
+// yyyy-mm-dd -> ISO em "meio-dia" local (tz-safe para timestamptz)
+    function toIsoNoonLocal(dateStr){
+      if(!dateStr) return null;
+      const [y,m,d] = dateStr.split('-').map(Number);
+      const localNoon = new Date(y, m-1, d, 12, 0, 0); // 12:00 hora local
+      return localNoon.toISOString(); // serializa em UTC mantendo o mesmo "dia" pretendido
+    }
+
+// ISO/Date/string -> "dd/mm/aaaa" sem aplicar fuso
+    function formatDateLocal(dateLike){
+      if(!dateLike) return '—';
+      const s = String(dateLike);
+      const base = s.includes('T') ? s.split('T')[0] : s; // '2025-11-07'
+      const [y,m,d] = base.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+// ISO/Date/string -> "yyyy-mm-dd" para preencher <input type="date">
+    function toInputDateValue(dateLike){
+      if(!dateLike) return '';
+      const s = String(dateLike);
+      return s.includes('T') ? s.split('T')[0] : s;
+    }
+
+// Date -> "yyyy-mm-dd" (hoje, local, sem UTC)
+    function todayInputLocal(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
     const wait = ms => new Promise(r=>setTimeout(r,ms));
 
     // normalização para busca (remove acentos)
@@ -503,8 +537,8 @@
         const tb=document.createElement('tbody');
         for(const r of arr){
           const tr=document.createElement('tr');
-          const tdo=document.createElement('td'); tdo.textContent=formatDateLocal(r.data_ocorrencia);
-          const tda=document.createElement('td'); tda.textContent=formatDateLocal(r.data_aplicacao);
+          const tdo=document.createElement('td'); tdo.textContent = formatDateLocal(r?.data_ocorrencia);
+          const tda=document.createElement('td'); tda.textContent = formatDateLocal(r?.data_aplicacao);
           const ttt=document.createElement('td'); const subt=r?.verbal_motivo||null; ttt.textContent=r?.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
           const tan=document.createElement('td');
           if(r?.arquivo_path){
@@ -565,7 +599,7 @@
 
     function resetForm(){
       E.f_edit.value=''; localStorage.removeItem(EDIT_KEY);
-      const today=new Date().toISOString().slice(0,10);
+      const today = todayInputLocal();
       E.f_search.value=''; E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
       E.f_oc.value=today; E.f_ap.value=today; E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Atraso'; E.f_file.value='';
       toggleVerbal(); saveDraftDebounced();
@@ -576,7 +610,8 @@
     function startEdit(r){
       setTab('adv'); E.f_edit.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
       if(r?.colaborador_id) setColabById(r.colaborador_id,true); else {E.f_search.value=r?.colaborador_nome||''; resolveColab();}
-      E.f_oc.value=r?.data_ocorrencia?.substring(0,10)||''; E.f_ap.value=r?.data_aplicacao?.substring(0,10)||'';
+      E.f_oc.value = toInputDateValue(r?.data_ocorrencia) || '';
+      E.f_ap.value = toInputDateValue(r?.data_aplicacao)  || '';
       if(r?.tipo==='Verbal'){E.f_tipo.value='Verbal'; E.f_verbal_sub.value=r?.verbal_motivo||'Atraso';} else {E.f_tipo.value=r?.tipo||'Verbal';}
       toggleVerbal(); saveDraftDebounced();
     }
@@ -594,8 +629,8 @@
       const payload={
         colaborador_id:E.f_colab_id.value,
         colaborador:nome,
-        data_ocorrencia:E.f_oc.value,
-        data_aplicacao:E.f_ap.value,
+        data_ocorrencia: toIsoNoonLocal(E.f_oc.value),
+        data_aplicacao:  toIsoNoonLocal(E.f_ap.value),
         tipo:E.f_tipo.value,
         verbal_motivo:(E.f_tipo.value==='Verbal')?E.f_verbal_sub.value:null
       };
@@ -638,7 +673,7 @@
     /* === Init + realtime === */
     (async function init(){
       const {data:{session}}=await supabaseClient.auth.getSession(); setLogged(session);
-      const today=new Date().toISOString().slice(0,10); E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
+      const today = todayInputLocal(); E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
       if(session){ setTab('colab'); await loadColabs(); await loadAdv(); bindRt(); loadDraft(); }
       supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); } });
     })();
@@ -654,4 +689,5 @@
   </script>
 </body>
 </html>
+
 
