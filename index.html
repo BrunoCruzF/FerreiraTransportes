@@ -89,7 +89,7 @@
     .toast.ok{border-color:rgba(34,197,94,.6)}
     .toast.err{border-color:rgba(239,68,68,.7)}
 
-    /* Modal de confirmação */
+    /* Modal de confirmação / info */
     .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:30}
     .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:560px;width:92%;box-shadow:0 22px 60px rgba(0,0,0,.35)}
     .modal-h{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:800}
@@ -102,7 +102,10 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <a href="#" id="home-link"><img src="./logo.png" alt="Ferreira Transportes & Logística" class="logo-img"/><h1>Controle de Advertências</h1></a>
+      <a href="#" id="home-link">
+        <img src="./logo.png" alt="Ferreira Transportes & Logística" class="logo-img"/>
+        <h1>Controle de Advertências</h1>
+      </a>
     </div>
     <div class="userbox">
       <button id="btn-theme" class="icon-btn">🌙 Tema</button>
@@ -151,7 +154,15 @@
         </div>
       </form>
       <table style="margin-top:16px">
-        <thead><tr><th>Nome</th><th>CPF</th><th>CTPS</th><th>Série</th><th style="width:1%"></th></tr></thead>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>CTPS</th>
+            <th>Série</th>
+            <th style="width:1%"></th>
+          </tr>
+        </thead>
         <tbody id="tbl-colab"></tbody>
       </table>
       <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
@@ -183,20 +194,27 @@
         <label>Tipo de advertência
           <select id="f_tipo" required class="field">
             <option>Verbal</option>
-            <option>Falta não justificada</option>
-            <option>Atraso</option>
-            <option>Insubordinação</option>
-            <option>Indisciplina</option>
-            <option>Não registrou o ponto</option>
+            <option>Escrita</option>
           </select>
         </label>
         <label id="grp_verbal">Subtipo (quando Verbal)
-          <select id="f_verbal_sub" class="field"><option>Atraso</option><option>Falta não justificada</option></select>
+          <select id="f_verbal_sub" class="field">
+            <option>Falta não justificada</option>
+            <option>Atraso</option>
+            <option>Não registrou o ponto</option>
+            <option>Insubordinação</option>
+            <option>Indisciplina</option>
+          </select>
         </label>
         <label style="grid-column:1/-1">Anexo (PNG ou PDF)
           <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" class="field"/>
         </label>
-        <div class="row" style="grid-column:1/-1"><button class="primary" type="submit">💾 Salvar</button></div>
+        <label style="grid-column:1/-1">Observação
+          <textarea id="f_observacao" class="field" rows="3" placeholder="Escreva um breve contexto ou detalhes..."></textarea>
+        </label>
+        <div class="row" style="grid-column:1/-1">
+          <button class="primary" type="submit">💾 Salvar</button>
+        </div>
       </form>
       <p class="muted" style="margin-top:8px">O formulário guarda rascunho automaticamente ao trocar de aba.</p>
     </section>
@@ -244,33 +262,32 @@
     function $(s){return document.querySelector(s)}
     function $$(s){return document.querySelectorAll(s)}
     function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-    // === FUNÇÕES DE DATA (corrigem o fuso horário) ===
+    const wait = ms => new Promise(r=>setTimeout(r,ms));
 
-// yyyy-mm-dd -> ISO em "meio-dia" local (tz-safe para timestamptz)
+    // === FUNÇÕES DE DATA (corrigem o fuso) ===
+    // yyyy-mm-dd -> ISO em "meio-dia" local
     function toIsoNoonLocal(dateStr){
       if(!dateStr) return null;
       const [y,m,d] = dateStr.split('-').map(Number);
-      const localNoon = new Date(y, m-1, d, 12, 0, 0); // 12:00 hora local
-      return localNoon.toISOString(); // serializa em UTC mantendo o mesmo "dia" pretendido
+      const localNoon = new Date(y, m-1, d, 12, 0, 0);
+      return localNoon.toISOString();
     }
-
-// ISO/Date/string -> "dd/mm/aaaa" sem aplicar fuso
+    // ISO/Date/string -> dd/mm/aaaa (sem new Date())
     function formatDateLocal(dateLike){
       if(!dateLike) return '—';
       const s = String(dateLike);
-      const base = s.includes('T') ? s.split('T')[0] : s; // '2025-11-07'
+      const base = s.includes('T') ? s.split('T')[0] : s;
       const [y,m,d] = base.split('-');
+      if(!y||!m||!d) return s;
       return `${d}/${m}/${y}`;
     }
-
-// ISO/Date/string -> "yyyy-mm-dd" para preencher <input type="date">
+    // ISO/Date/string -> yyyy-mm-dd para input[type=date]
     function toInputDateValue(dateLike){
       if(!dateLike) return '';
       const s = String(dateLike);
       return s.includes('T') ? s.split('T')[0] : s;
     }
-
-// Date -> "yyyy-mm-dd" (hoje, local, sem UTC)
+    // hoje local -> yyyy-mm-dd sem UTC
     function todayInputLocal(){
       const d = new Date();
       const y = d.getFullYear();
@@ -278,9 +295,8 @@
       const day = String(d.getDate()).padStart(2,'0');
       return `${y}-${m}-${day}`;
     }
-    const wait = ms => new Promise(r=>setTimeout(r,ms));
 
-    // normalização para busca (remove acentos)
+    // normalização para busca
     const fold  = v => (v ?? '').toString().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
     const lower = v => fold(v).toLowerCase();
     const digits = v => (v ?? '').toString().replace(/\D/g,'');
@@ -289,32 +305,51 @@
     const toasts = $('#toasts');
     function toast(txt, kind='ok', ms=2000){
       const t=document.createElement('div'); t.className=`toast ${kind}`; t.textContent=txt;
-      toasts.appendChild(t); setTimeout(()=>{t.style.opacity='0'; t.style.transform='translateY(6px)';}, ms-300);
+      toasts.appendChild(t);
+      setTimeout(()=>{t.style.opacity='0'; t.style.transform='translateY(6px)';}, ms-300);
       setTimeout(()=>t.remove(), ms);
     }
 
-    /* === Modal Confirm === */
+    /* === Modal Confirm / Info === */
     const modal = {
       back: $('#modal-back'), title: $('#m-title'), body: $('#m-body'), ok: $('#m-ok'), cancel: $('#m-cancel')
     };
     function confirmModal({title='Confirmar', body='Tem certeza?', okText='Excluir', okClass='danger'}){
       return new Promise(resolve=>{
-        modal.title.textContent=title; modal.body.innerHTML=body;
-        modal.ok.textContent=okText; modal.ok.className=okClass; modal.back.style.display='flex';
+        modal.title.textContent=title;
+        modal.body.innerHTML=body;
+        modal.ok.textContent=okText;
+        modal.ok.className=okClass;
+        modal.back.style.display='flex';
         function close(v){modal.back.style.display='none'; modal.cancel.onclick=null; modal.ok.onclick=null; resolve(v);}
         modal.cancel.onclick=()=>close(false);
         modal.ok.onclick=()=>close(true);
         modal.back.onclick=e=>{ if(e.target===modal.back) close(false); };
       });
     }
+    function showInfo(title, html){
+      modal.title.textContent = title || 'Informação';
+      modal.body.innerHTML = html || '<p class="muted">Sem conteúdo.</p>';
+      modal.ok.textContent = 'Fechar';
+      modal.ok.className = 'secondary';
+      modal.back.style.display = 'flex';
+      const close = ()=>{ modal.back.style.display='none'; modal.cancel.onclick=null; modal.ok.onclick=null; };
+      modal.cancel.onclick = close;
+      modal.ok.onclick = close;
+      modal.back.onclick = (e)=>{ if(e.target===modal.back) close(); };
+    }
 
     /* === Debounce + rascunho silencioso === */
     function debounce(fn, ms){ let t; const d=(...a)=>{clearTimeout(t); t=setTimeout(()=>fn(...a),ms)}; d.flush=()=>{clearTimeout(t);fn()}; return d; }
     function saveDraft(){
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        colaborador_id:E.f_colab_id.value||'', colaborador_busca:E.f_search.value||'',
-        data_ocorrencia:E.f_oc.value||'', data_aplicacao:E.f_ap.value||'',
-        tipo:E.f_tipo.value||'Verbal', verbal_sub:E.f_verbal_sub.value||'Atraso'
+        colaborador_id:E.f_colab_id.value||'',
+        colaborador_busca:E.f_search.value||'',
+        data_ocorrencia:E.f_oc.value||'',
+        data_aplicacao:E.f_ap.value||'',
+        tipo:E.f_tipo.value||'Verbal',
+        verbal_sub:E.f_verbal_sub.value||'Falta não justificada',
+        observacao:E.f_obs.value||''
       }));
     }
     const saveDraftDebounced = debounce(saveDraft, 400);
@@ -334,7 +369,7 @@
       const isLight=(document.body.getAttribute('data-theme')==='light')||(!document.body.hasAttribute('data-theme')&&matchMedia('(prefers-color-scheme: light)').matches);
       E.btnTheme.textContent=isLight?'🌞 Tema':'🌙 Tema';
     }
-    E.btnTheme.onclick=()=>{const c=document.body.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.body.setAttribute('data-theme',n);localStorage.setItem(THEME_KEY,n);applyTheme(n);}
+    E.btnTheme.onclick=()=>{const c=document.body.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.body.setAttribute('data-theme',n);localStorage.setItem(THEME_KEY,n);applyTheme(n);};
     applyTheme(localStorage.getItem(THEME_KEY));
 
     /* === Elements === */
@@ -348,6 +383,7 @@
     E.f_colab_id=$('#f_colaborador_id'); E.f_cpf=$('#f_cpf'); E.f_ctps=$('#f_ctps'); E.f_serie=$('#f_serie');
     E.f_oc=$('#f_data_ocorrencia'); E.f_ap=$('#f_data_aplicacao'); E.f_tipo=$('#f_tipo');
     E.f_verbal_grp=$('#grp_verbal'); E.f_verbal_sub=$('#f_verbal_sub'); E.f_file=$('#f_arquivo');
+    E.f_obs=$('#f_observacao');
     E.btnNew=$('#btn-new-adv'); E.btnClear=$('#btn-clear-adv');
     E.filter=$('#filter'); E.grpContainer=$('#grp-container'); E.empty=$('#empty');
 
@@ -369,23 +405,30 @@
 
     /* === Auth === */
     function setLogged(s){
-      const logged=!!s; E.viewAuth.classList.toggle('hidden',logged); E.viewApp.classList.toggle('hidden',!logged);
-      E.btnLogout.classList.toggle('hidden',!logged); document.getElementById('user-email').textContent=logged?s.user.email:'Deslogado';
+      const logged=!!s;
+      E.viewAuth.classList.toggle('hidden',logged);
+      E.viewApp.classList.toggle('hidden',!logged);
+      E.btnLogout.classList.toggle('hidden',!logged);
+      document.getElementById('user-email').textContent=logged?s.user.email:'Deslogado';
     }
-    E.btnLogout.onclick=async()=>{await supabaseClient.auth.signOut();}
+    E.btnLogout.onclick=async()=>{await supabaseClient.auth.signOut();};
     $('#btn-login').onclick=async()=>{
-      const email=E.email.value.trim(),password=E.password.value;if(!email||!password)return msg('Preencha e-mail e senha.',true);
+      const email=E.email.value.trim(),password=E.password.value;
+      if(!email||!password)return msg('Preencha e-mail e senha.',true);
       const {error}=await supabaseClient.auth.signInWithPassword({email,password}); if(error) msg(error.message,true);
-    }
+    };
     $('#btn-signup').onclick=async()=>{
-      const email=E.email.value.trim(),password=E.password.value;if(!email||!password)return msg('Defina e-mail e senha.',true);
-      const {error}=await supabaseClient.auth.signUp({email,password}); msg(error?error.message:'Conta criada! Verifique seu e-mail.',!!error)
-    }
+      const email=E.email.value.trim(),password=E.password.value;
+      if(!email||!password)return msg('Defina e-mail e senha.',true);
+      const {error}=await supabaseClient.auth.signUp({email,password});
+      msg(error?error.message:'Conta criada! Verifique seu e-mail.',!!error);
+    };
     $('#btn-recover').onclick=async()=>{
       const email=E.email.value.trim(); if(!email)return msg('Digite seu e-mail.',true);
-      const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin}); msg(error?error.message:'Se existir, enviaremos o link.',!!error)
-    }
-    function msg(t,err){E.msg.textContent=t;E.msg.style.color=err?'#f87171':'#34d399'}
+      const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+      msg(error?error.message:'Se existir, enviaremos o link.',!!error);
+    };
+    function msg(t,err){E.msg.textContent=t;E.msg.style.color=err?'#f87171':'#34d399';}
 
     /* === Colaboradores === */
     E.toggleColabForm.onclick=()=>E.formColab.classList.toggle('hidden');
@@ -401,44 +444,51 @@
       if(E.f_colab_id.value) setColabById(E.f_colab_id.value);
     }
 
-function renderColabs(items){
-  E.tblColab.innerHTML='';
-  if(!items.length){E.colabEmpty.classList.remove('hidden');return;}
-  E.colabEmpty.classList.add('hidden');
+    async function editColabName(c){
+      const atual=c?.nome||'';
+      const novo=prompt('Editar nome do colaborador:',atual);
+      if(novo===null) return;
+      const nome=(novo||'').trim();
+      if(!nome){ toast('Nome inválido','err'); return; }
+      if(nome===atual) return;
+      const {error}=await supabaseClient.from('colaboradores').update({nome}).eq('id',c.id);
+      if(error){ alert('Erro ao atualizar: '+error.message); return; }
+      toast('Nome atualizado ✅');
+      await loadColabs();
+    }
 
-  for(const c of items){
-    const tr=document.createElement('tr');
-    tr.innerHTML = `
-      <td>${esc(c?.nome)}</td>
-      <td>${esc(c?.cpf||'')}</td>
-      <td>${esc(c?.ctps||'')}</td>
-      <td>${esc(c?.serie||'')}</td>
-      <td>
-        <div class="actions-inline">
-          <button class="icon" title="Editar nome">✏️</button>
-          <button class="icon danger" title="Excluir">🗑️</button>
-        </div>
-      </td>
-    `;
-
-    const [btnEdit, btnDel] = tr.querySelectorAll('.actions-inline .icon');
-
-    btnEdit.onclick = () => editColabName(c);
-
-    btnDel.onclick = async () => {
-      const ok = await confirmModal({
-        title:'Excluir colaborador',
-        body:`<p>Remover <b>${esc(c?.nome)}</b>?</p><p class="muted">Atenção: não remove advertências já lançadas.</p>`,
-        okText:'Sim, excluir', okClass:'danger'
-      });
-      if(!ok) return;
-      await supabaseClient.from('colaboradores').delete().eq('id',c.id);
-      setTimeout(loadColabs,2000);
-    };
-
-    E.tblColab.appendChild(tr);
-  }
-}
+    function renderColabs(items){
+      E.tblColab.innerHTML='';
+      if(!items.length){E.colabEmpty.classList.remove('hidden');return;}
+      E.colabEmpty.classList.add('hidden');
+      for(const c of items){
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td>${esc(c?.nome)}</td>
+          <td>${esc(c?.cpf||'')}</td>
+          <td>${esc(c?.ctps||'')}</td>
+          <td>${esc(c?.serie||'')}</td>
+          <td>
+            <div class="actions-inline">
+              <button class="icon" title="Editar nome">✏️</button>
+              <button class="icon danger" title="Excluir">🗑️</button>
+            </div>
+          </td>`;
+        const [btnEdit, btnDel] = tr.querySelectorAll('.actions-inline .icon');
+        btnEdit.onclick = () => editColabName(c);
+        btnDel.onclick = async () => {
+          const ok=await confirmModal({
+            title:'Excluir colaborador',
+            body:`<p>Remover <b>${esc(c?.nome)}</b>?</p><p class="muted">Atenção: não remove advertências já lançadas.</p>`,
+            okText:'Sim, excluir', okClass:'danger'
+          });
+          if(!ok) return;
+          await supabaseClient.from('colaboradores').delete().eq('id',c.id);
+          setTimeout(loadColabs,2000);
+        };
+        E.tblColab.appendChild(tr);
+      }
+    }
 
     /* === Combobox Colaborador (blindado) === */
     let comboIndex=-1;
@@ -529,28 +579,6 @@ function renderColabs(items){
       advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
       renderGrouped(advCache);
     }
-    async function editColabName(c){
-      const atual = c?.nome || '';
-      const novo = prompt('Editar nome do colaborador:', atual);
-      if(novo === null) return; // cancelado
-      const nome = (novo || '').trim();
-      if(!nome){ toast('Nome inválido', 'err'); return; }
-      if(nome === atual){ return; }
-
-      const { error } = await supabaseClient
-        .from('colaboradores')
-        .update({ nome })
-        .eq('id', c.id);
-
-    if(error){ alert('Erro ao atualizar: ' + error.message); return; }
-    toast('Nome atualizado ✅');
-    await loadColabs(); // recarrega a lista e a combobox
-  }
-    function formatDateLocal(dateStr){
-      if(!dateStr) return '—';
-      const [y,m,d] = dateStr.split('T')[0].split('-');
-      return `${d}/${m}/${y}`;
-    }
     function renderGrouped(items){
       E.grpContainer.innerHTML='';
       if(!items.length){E.empty.classList.remove('hidden');return;}
@@ -571,9 +599,11 @@ function renderColabs(items){
         const tb=document.createElement('tbody');
         for(const r of arr){
           const tr=document.createElement('tr');
-          const tdo=document.createElement('td'); tdo.textContent = formatDateLocal(r?.data_ocorrencia);
-          const tda=document.createElement('td'); tda.textContent = formatDateLocal(r?.data_aplicacao);
-          const ttt=document.createElement('td'); const subt=r?.verbal_motivo||null; ttt.textContent=r?.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
+          const tdo=document.createElement('td'); tdo.textContent=formatDateLocal(r?.data_ocorrencia);
+          const tda=document.createElement('td'); tda.textContent=formatDateLocal(r?.data_aplicacao);
+          const ttt=document.createElement('td');
+          const subt=r?.verbal_motivo||null;
+          ttt.textContent=r?.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
           const tan=document.createElement('td');
           if(r?.arquivo_path){
             const {data:pub}=supabaseClient.storage.from('adv_docs').getPublicUrl(r.arquivo_path);
@@ -582,7 +612,9 @@ function renderColabs(items){
           const tac=document.createElement('td'); const wrap=document.createElement('div'); wrap.className='actions-inline';
           const ed=document.createElement('button'); ed.className='icon'; ed.title='Editar'; ed.textContent='✏️'; ed.onclick=()=>startEdit(r);
           const ex=document.createElement('button'); ex.className='icon danger'; ex.title='Excluir'; ex.textContent='🗑️'; ex.onclick=()=>delAdvConfirm(r);
-          wrap.append(ed,ex); tac.appendChild(wrap);
+          const obsBtn=document.createElement('button'); obsBtn.className='icon'; obsBtn.title='Ver observação'; obsBtn.textContent='📝';
+          obsBtn.onclick=()=>{const texto=(r?.observacao||'').trim();showInfo('Observação', texto?`<div style="white-space:pre-wrap">${esc(texto)}</div>`:'<p class="muted">Sem observação.</p>');};
+          wrap.append(ed,ex,obsBtn); tac.appendChild(wrap);
           tr.append(tdo,tda,ttt,tan,tac); tb.appendChild(tr);
         }
         table.appendChild(tb); body.appendChild(table); grp.appendChild(head); grp.appendChild(body);
@@ -590,8 +622,13 @@ function renderColabs(items){
         E.grpContainer.appendChild(grp);
       }
     }
-    E.filter.oninput=()=>{const f=lower(E.filter.value).trim();
-      const filtered=(advCache||[]).filter(x=> lower(x?.colaborador_nome||x?.colaborador).includes(f) || lower(x?.colaborador_cpf).includes(f) || lower(x?.colaborador_ctps).includes(f) );
+    E.filter.oninput=()=>{
+      const f=lower(E.filter.value).trim();
+      const filtered=(advCache||[]).filter(x=>
+        lower(x?.colaborador_nome||x?.colaborador).includes(f) ||
+        lower(x?.colaborador_cpf).includes(f) ||
+        lower(x?.colaborador_ctps).includes(f)
+      );
       renderGrouped(filtered);
     };
 
@@ -599,7 +636,7 @@ function renderColabs(items){
       const ok=await confirmModal({
         title:'Excluir advertência',
         body:`<p>Excluir advertência de <b>${esc(r?.colaborador_nome||r?.colaborador||'—')}</b>?</p>
-              <p class="muted">Ocorrência: ${r?.data_ocorrencia?new Date(r.data_ocorrencia).toLocaleDateString():'—'}</p>`,
+              <p class="muted">Ocorrência: ${formatDateLocal(r?.data_ocorrencia)}</p>`,
         okText:'Sim, excluir', okClass:'danger'
       });
       if(!ok) return;
@@ -627,15 +664,16 @@ function renderColabs(items){
         if(d.data_aplicacao)E.f_ap.value=d.data_aplicacao;
         if(d.tipo){E.f_tipo.value=d.tipo; toggleVerbal();}
         if(d.verbal_sub)E.f_verbal_sub.value=d.verbal_sub;
+        if(d.observacao!==undefined)E.f_obs.value=d.observacao;
       }catch{}
     }
-    ;[E.f_search,E.f_oc,E.f_ap,E.f_tipo,E.f_verbal_sub].forEach(el=>el.addEventListener('input',saveDraftDebounced));
+    ;[E.f_search,E.f_oc,E.f_ap,E.f_tipo,E.f_verbal_sub,E.f_obs].forEach(el=>el.addEventListener('input',saveDraftDebounced));
 
     function resetForm(){
       E.f_edit.value=''; localStorage.removeItem(EDIT_KEY);
-      const today = todayInputLocal();
+      const today=todayInputLocal();
       E.f_search.value=''; E.f_colab_id.value=''; E.f_cpf.value=E.f_ctps.value=E.f_serie.value='';
-      E.f_oc.value=today; E.f_ap.value=today; E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Atraso'; E.f_file.value='';
+      E.f_oc.value=today; E.f_ap.value=today; E.f_tipo.value='Verbal'; E.f_verbal_sub.value='Falta não justificada'; E.f_file.value=''; E.f_obs.value='';
       toggleVerbal(); saveDraftDebounced();
     }
     E.btnNew.onclick=()=>{resetForm(); setTab('adv');};
@@ -644,14 +682,26 @@ function renderColabs(items){
     function startEdit(r){
       setTab('adv'); E.f_edit.value=r.id; localStorage.setItem(EDIT_KEY,r.id);
       if(r?.colaborador_id) setColabById(r.colaborador_id,true); else {E.f_search.value=r?.colaborador_nome||''; resolveColab();}
-      E.f_oc.value = toInputDateValue(r?.data_ocorrencia) || '';
-      E.f_ap.value = toInputDateValue(r?.data_aplicacao)  || '';
-      if(r?.tipo==='Verbal'){E.f_tipo.value='Verbal'; E.f_verbal_sub.value=r?.verbal_motivo||'Atraso';} else {E.f_tipo.value=r?.tipo||'Verbal';}
+      E.f_oc.value=toInputDateValue(r?.data_ocorrencia)||'';
+      E.f_ap.value=toInputDateValue(r?.data_aplicacao)||'';
+      if(r?.tipo==='Verbal'){
+        E.f_tipo.value='Verbal';
+        E.f_verbal_sub.value=r?.verbal_motivo||'Falta não justificada';
+      } else {
+        E.f_tipo.value=r?.tipo||'Escrita';
+      }
+      E.f_obs.value=r?.observacao||'';
       toggleVerbal(); saveDraftDebounced();
     }
 
     function sanitizeFileName(name){
-      return (name||'arquivo').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9._-]/g,'_').replace(/_+/g,'_').replace(/^_+|_+$/g,'');
+      return (name||'arquivo')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g,'')
+        .replace(/\s+/g,'_')
+        .replace(/[^a-zA-Z0-9._-]/g,'_')
+        .replace(/_+/g,'_')
+        .replace(/^_+|_+$/g,'');
     }
 
     E.formAdv.onsubmit=async(e)=>{
@@ -663,10 +713,11 @@ function renderColabs(items){
       const payload={
         colaborador_id:E.f_colab_id.value,
         colaborador:nome,
-        data_ocorrencia: toIsoNoonLocal(E.f_oc.value),
-        data_aplicacao:  toIsoNoonLocal(E.f_ap.value),
+        data_ocorrencia:toIsoNoonLocal(E.f_oc.value),
+        data_aplicacao: toIsoNoonLocal(E.f_ap.value),
         tipo:E.f_tipo.value,
-        verbal_motivo:(E.f_tipo.value==='Verbal')?E.f_verbal_sub.value:null
+        verbal_motivo:(E.f_tipo.value==='Verbal')?E.f_verbal_sub.value:null,
+        observacao:(E.f_obs.value||'').trim()||null
       };
 
       const file=E.f_file.files[0];
@@ -701,13 +752,12 @@ function renderColabs(items){
       if((e.ctrlKey||e.metaKey) && key==='s'){
         if(!E.tabAdv.classList.contains('hidden')){ e.preventDefault(); E.formAdv.requestSubmit(); }
       }
-      // atalho "n" removido para não atrapalhar digitação do nome
     });
 
     /* === Init + realtime === */
     (async function init(){
       const {data:{session}}=await supabaseClient.auth.getSession(); setLogged(session);
-      const today = todayInputLocal(); E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
+      const today=todayInputLocal(); E.f_oc.value=today; E.f_ap.value=today; toggleVerbal();
       if(session){ setTab('colab'); await loadColabs(); await loadAdv(); bindRt(); loadDraft(); }
       supabaseClient.auth.onAuthStateChange((_e,s)=>{ setLogged(s); if(s){ loadColabs(); loadAdv(); bindRt(); setTab('colab'); loadDraft(); } });
     })();
