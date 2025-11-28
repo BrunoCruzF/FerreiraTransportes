@@ -401,27 +401,44 @@
       if(E.f_colab_id.value) setColabById(E.f_colab_id.value);
     }
 
-    function renderColabs(items){
-      E.tblColab.innerHTML='';
-      if(!items.length){E.colabEmpty.classList.remove('hidden');return;}
-      E.colabEmpty.classList.add('hidden');
-      for(const c of items){
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${esc(c?.nome)}</td><td>${esc(c?.cpf||'')}</td><td>${esc(c?.ctps||'')}</td><td>${esc(c?.serie||'')}</td>
-        <td><button class="icon danger" title="Excluir">🗑️</button></td>`;
-        tr.querySelector('button').onclick=async()=>{
-          const ok=await confirmModal({
-            title:'Excluir colaborador',
-            body:`<p>Remover <b>${esc(c?.nome)}</b>?</p><p class="muted">Atenção: não remove advertências já lançadas.</p>`,
-            okText:'Sim, excluir', okClass:'danger'
-          });
-          if(!ok) return;
-          await supabaseClient.from('colaboradores').delete().eq('id',c.id);
-          setTimeout(loadColabs,2000);
-        };
-        E.tblColab.appendChild(tr);
-      }
-    }
+function renderColabs(items){
+  E.tblColab.innerHTML='';
+  if(!items.length){E.colabEmpty.classList.remove('hidden');return;}
+  E.colabEmpty.classList.add('hidden');
+
+  for(const c of items){
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>${esc(c?.nome)}</td>
+      <td>${esc(c?.cpf||'')}</td>
+      <td>${esc(c?.ctps||'')}</td>
+      <td>${esc(c?.serie||'')}</td>
+      <td>
+        <div class="actions-inline">
+          <button class="icon" title="Editar nome">✏️</button>
+          <button class="icon danger" title="Excluir">🗑️</button>
+        </div>
+      </td>
+    `;
+
+    const [btnEdit, btnDel] = tr.querySelectorAll('.actions-inline .icon');
+
+    btnEdit.onclick = () => editColabName(c);
+
+    btnDel.onclick = async () => {
+      const ok = await confirmModal({
+        title:'Excluir colaborador',
+        body:`<p>Remover <b>${esc(c?.nome)}</b>?</p><p class="muted">Atenção: não remove advertências já lançadas.</p>`,
+        okText:'Sim, excluir', okClass:'danger'
+      });
+      if(!ok) return;
+      await supabaseClient.from('colaboradores').delete().eq('id',c.id);
+      setTimeout(loadColabs,2000);
+    };
+
+    E.tblColab.appendChild(tr);
+  }
+}
 
     /* === Combobox Colaborador (blindado) === */
     let comboIndex=-1;
@@ -512,6 +529,23 @@
       advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
       renderGrouped(advCache);
     }
+    async function editColabName(c){
+      const atual = c?.nome || '';
+      const novo = prompt('Editar nome do colaborador:', atual);
+      if(novo === null) return; // cancelado
+      const nome = (novo || '').trim();
+      if(!nome){ toast('Nome inválido', 'err'); return; }
+      if(nome === atual){ return; }
+
+      const { error } = await supabaseClient
+        .from('colaboradores')
+        .update({ nome })
+        .eq('id', c.id);
+
+    if(error){ alert('Erro ao atualizar: ' + error.message); return; }
+    toast('Nome atualizado ✅');
+    await loadColabs(); // recarrega a lista e a combobox
+  }
     function formatDateLocal(dateStr){
       if(!dateStr) return '—';
       const [y,m,d] = dateStr.split('T')[0].split('-');
@@ -689,5 +723,3 @@
   </script>
 </body>
 </html>
-
-
