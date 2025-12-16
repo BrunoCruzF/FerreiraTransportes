@@ -197,7 +197,7 @@
             <option>Escrita</option>
           </select>
         </label>
-        <label id="grp_verbal">Subtipo (quando Verbal)
+        <label id="grp_verbal">Subtipo
           <select id="f_verbal_sub" class="field">
             <option>Falta não justificada</option>
             <option>Atraso</option>
@@ -650,7 +650,11 @@
     }
 
     /* === Advertência (cadastro/edição) === */
-    function toggleVerbal(){ E.f_verbal_grp.style.display=(E.f_tipo.value==='Verbal')?'block':'none'; }
+    function toggleVerbal(){
+      const tipo = E.f_tipo.value;
+        E.f_verbal_grp.style.display =
+          (tipo === 'Verbal' || tipo === 'Escrita') ? 'block' : 'none';
+    }
     E.f_tipo.onchange=()=>{ toggleVerbal(); saveDraftDebounced(); }
     E.f_verbal_sub.onchange=saveDraftDebounced;
 
@@ -716,7 +720,10 @@
         data_ocorrencia:toIsoNoonLocal(E.f_oc.value),
         data_aplicacao: toIsoNoonLocal(E.f_ap.value),
         tipo:E.f_tipo.value,
-        verbal_motivo:(E.f_tipo.value==='Verbal')?E.f_verbal_sub.value:null,
+        verbal_motivo:
+          (E.f_tipo.value === 'Verbal' || E.f_tipo.value === 'Escrita')
+            ? E.f_verbal_sub.value
+            : null,
         observacao:(E.f_obs.value||'').trim()||null
       };
 
@@ -773,3 +780,4 @@
   </script>
 </body>
 </html>
+
