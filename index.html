@@ -462,7 +462,7 @@
     document.querySelector('[data-tab="colab"]').onclick=()=>setTab('colab');
     document.querySelector('[data-tab="adv"]').onclick =()=>setTab('adv');
     document.querySelector('[data-tab="regs"]').onclick=()=>setTab('regs');
-    document.querySelector('[data-tab="dash"]').onclick=()=>setTab('dash');
+    document.querySelector('[data-tab="dash"]').onclick=async ()=>{ setTab('dash'); try{ await loadAdv(); gerarDashboard(advCache||[]);}catch(e){console.error(e);} };
 
     /* === Auth === */
     function setLogged(s){
@@ -498,7 +498,7 @@
 
     async function loadColabs(){
       const {data,error}=await supabaseClient.from('colaboradores').select('*').order('nome',{ascending:true});
-      if(error){console.error(error);return;}
+      if(error){console.error('loadAdv error', error); return;}
       colabList=Array.isArray(data)?data:[];
       renderColabs(colabList);
       refreshCombo();
@@ -636,10 +636,10 @@
     /* === Registros agrupados === */
     async function loadAdv(){
       const {data,error}=await supabaseClient.from('adv_registros_view').select('*');
-      if(error){console.error(error);return;}
+      if(error){console.error('loadAdv error', error); return;}
       advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
       renderGrouped(advCache);
-      gerarDashboard(advCache);
+      try{ gerarDashboard(advCache); }catch(e){ console.error('gerarDashboard error', e); }
     }
     function renderGrouped(items){
       E.grpContainer.innerHTML='';
