@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Controle de Advertências</title>
-  <link rel="icon" href="data:,">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Controle de Advertências</title>
+<link href="data:," rel="icon"/>
+<style>
     *{box-sizing:border-box}
     :root{
       --bg:#0b1220; --bg2:#0f172a; --card:#0f1628; --card2:#0c1325; --border:#1f2a44;
@@ -100,155 +101,146 @@
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <a href="#" id="home-link">
-        <img src="./logo.png" alt="Ferreira Transportes & Logística" class="logo-img"/>
-        <h1>Controle de Advertências</h1>
-      </a>
-    </div>
-    <div class="userbox">
-      <button id="btn-theme" class="icon-btn">🌙 Tema</button>
-      <span id="user-email">Deslogado</span>
-      <button id="btn-logout" class="icon-btn hidden">Sair</button>
-    </div>
-  </header>
-
-  <!-- LOGIN -->
-  <main id="view-auth" class="container-sm">
-    <section class="card">
-      <h2 style="margin:0 0 12px">Acesse sua conta</h2>
-      <label>E-mail <input type="email" id="email" placeholder="voce@empresa.com.br" autocomplete="username" class="field"/></label>
-      <label>Senha  <input type="password" id="password" placeholder="********" autocomplete="current-password" class="field"/></label>
-      <div class="row">
-        <button id="btn-login" class="primary">Entrar</button>
-        <button id="btn-signup" class="secondary">Criar conta</button>
-        <button id="btn-recover" class="secondary">Esqueci minha senha</button>
-      </div>
-      <p id="auth-msg" class="muted"></p>
-    </section>
-  </main>
-
-  <!-- APP -->
-  <main id="view-app" class="container hidden">
-    <div class="tabs">
-      <button data-tab="colab" class="active">Colaboradores</button>
-      <button data-tab="adv">Advertências</button>
-      <button data-tab="regs">Registros de Advertência</button>
-    </div>
-
-    <!-- COLABORADORES -->
-    <section id="tab-colab" class="card">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <h2 style="margin:0">Colaboradores</h2>
-        <button id="toggle-colab-form" class="primary">Cadastrar Colaborador</button>
-      </div>
-      <form id="form-colab" class="grid-3 hidden" style="margin-top:16px">
-        <label>Nome  <input id="c_nome"  placeholder="Ex.: Jandira Silva" class="field" required/></label>
-        <label>CPF   <input id="c_cpf"   placeholder="000.000.000-00" class="field"/></label>
-        <label>CTPS  <input id="c_ctps"  placeholder="CTPS" class="field"/></label>
-        <label>Série <input id="c_serie" placeholder="Série" class="field"/></label>
-        <div class="row" style="grid-column:1/-1">
-          <button class="primary" type="submit">Adicionar</button>
-          <button type="button" class="secondary" id="cancel-colab-form">Cancelar</button>
-        </div>
-      </form>
-      <table style="margin-top:16px">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>CPF</th>
-            <th>CTPS</th>
-            <th>Série</th>
-            <th style="width:1%"></th>
-          </tr>
-        </thead>
-        <tbody id="tbl-colab"></tbody>
-      </table>
-      <p id="colab-empty" class="muted">Nenhum colaborador cadastrado.</p>
-    </section>
-
-    <!-- ADVERTÊNCIAS -->
-    <section id="tab-adv" class="card hidden">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <h2 style="margin:0">Cadastrar Advertência</h2>
-        <div>
-          <button id="btn-new-adv" class="icon" title="Nova advertência">🆕</button>
-          <button id="btn-clear-adv" class="icon" title="Limpar formulário">🧹</button>
-        </div>
-      </div>
-      <form id="form-adv" class="grid-4">
-        <input type="hidden" id="f_editing_id"/>
-        <label class="combo">Colaborador
+<header class="topbar">
+<div class="brand">
+<a href="#" id="home-link">
+<img alt="Ferreira Transportes &amp; Logística" class="logo-img" src="./logo.png"/>
+<h1>Controle de Advertências</h1>
+</a>
+</div>
+<div class="userbox">
+<button class="icon-btn" id="btn-theme">🌙 Tema</button>
+<span id="user-email">Deslogado</span>
+<button class="icon-btn hidden" id="btn-logout">Sair</button>
+</div>
+</header>
+<!-- LOGIN -->
+<main class="container-sm" id="view-auth">
+<section class="card">
+<h2 style="margin:0 0 12px">Acesse sua conta</h2>
+<label>E-mail <input autocomplete="username" class="field" id="email" placeholder="voce@empresa.com.br" type="email"/></label>
+<label>Senha  <input autocomplete="current-password" class="field" id="password" placeholder="********" type="password"/></label>
+<div class="row">
+<button class="primary" id="btn-login">Entrar</button>
+<button class="secondary" id="btn-signup">Criar conta</button>
+<button class="secondary" id="btn-recover">Esqueci minha senha</button>
+</div>
+<p class="muted" id="auth-msg"></p>
+</section>
+</main>
+<!-- APP -->
+<main class="container hidden" id="view-app">
+<div class="tabs">
+<button class="active" data-tab="colab">Colaboradores</button>
+<button data-tab="adv">Advertências</button>
+<button data-tab="regs">Registros de Advertência</button>
+</div>
+<!-- COLABORADORES -->
+<section class="card" id="tab-colab">
+<div class="row" style="justify-content:space-between;align-items:center">
+<h2 style="margin:0">Colaboradores</h2>
+<button class="primary" id="toggle-colab-form">Cadastrar Colaborador</button>
+</div>
+<form class="grid-3 hidden" id="form-colab" style="margin-top:16px">
+<label>Nome  <input class="field" id="c_nome" placeholder="Ex.: Jandira Silva" required=""/></label>
+<label>CPF   <input class="field" id="c_cpf" placeholder="000.000.000-00"/></label>
+<label>CTPS  <input class="field" id="c_ctps" placeholder="CTPS"/></label>
+<label>Série <input class="field" id="c_serie" placeholder="Série"/></label>
+<div class="row" style="grid-column:1/-1">
+<button class="primary" type="submit">Adicionar</button>
+<button class="secondary" id="cancel-colab-form" type="button">Cancelar</button>
+</div>
+</form>
+<table style="margin-top:16px">
+<thead>
+<tr>
+<th>Nome</th>
+<th>CPF</th>
+<th>CTPS</th>
+<th>Série</th>
+<th style="width:1%"></th>
+</tr>
+</thead>
+<tbody id="tbl-colab"></tbody>
+</table>
+<p class="muted" id="colab-empty">Nenhum colaborador cadastrado.</p>
+</section>
+<!-- ADVERTÊNCIAS -->
+<section class="card hidden" id="tab-adv">
+<div class="row" style="justify-content:space-between;align-items:center">
+<h2 style="margin:0">Cadastrar Advertência</h2>
+<div>
+<button class="icon" id="btn-new-adv" title="Nova advertência">🆕</button>
+<button class="icon" id="btn-clear-adv" title="Limpar formulário">🧹</button>
+</div>
+</div>
+<form class="grid-4" id="form-adv">
+<input id="f_editing_id" type="hidden"/>
+<label class="combo">Colaborador
           <div class="combo-input">
-            <input id="f_colab_search" class="field" placeholder="Digite para pesquisar..." autocomplete="off">
-            <input type="hidden" id="f_colaborador_id">
-          </div>
-          <div id="combo-list" class="combo-list hidden"></div>
-        </label>
-        <label>CPF  <input id="f_cpf"  readonly placeholder="—" class="field"/></label>
-        <label>CTPS <input id="f_ctps" readonly placeholder="—" class="field"/></label>
-        <label>Série<input id="f_serie"readonly placeholder="—" class="field"/></label>
-        <label>Data da ocorrência <input type="date" id="f_data_ocorrencia" required class="field"/></label>
-        <label>Data da aplicação  <input type="date" id="f_data_aplicacao" required class="field"/></label>
-        <label>Tipo de advertência
-          <select id="f_tipo" required class="field">
-            <option>Verbal</option>
-            <option>Escrita</option>
-          </select>
-        </label>
-        <label id="grp_verbal">Subtipo
-          <select id="f_verbal_sub" class="field">
-            <option>Falta não justificada</option>
-            <option>Atraso</option>
-            <option>Não registrou o ponto</option>
-            <option>Insubordinação</option>
-            <option>Indisciplina</option>
-          </select>
-        </label>
-        <label style="grid-column:1/-1">Anexo (PNG ou PDF)
-          <input type="file" id="f_arquivo" accept=".png,.pdf,image/png,application/pdf" class="field"/>
-        </label>
-        <label style="grid-column:1/-1">Observação
-          <textarea id="f_observacao" class="field" rows="3" placeholder="Escreva um breve contexto ou detalhes..."></textarea>
-        </label>
-        <div class="row" style="grid-column:1/-1">
-          <button class="primary" type="submit">💾 Salvar</button>
-        </div>
-      </form>
-      <p class="muted" style="margin-top:8px">O formulário guarda rascunho automaticamente ao trocar de aba.</p>
-    </section>
-
-    <!-- REGISTROS AGRUPADOS -->
-    <section id="tab-regs" class="card hidden">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <h2 style="margin:0">Registros de Advertência</h2>
-        <input id="filter" class="field" style="max-width:420px" placeholder="Filtrar por colaborador, CPF ou CTPS"/>
-      </div>
-      <div id="grp-container" style="margin-top:12px"></div>
-      <p id="empty" class="muted">Nenhum registro ainda.</p>
-    </section>
-  </main>
-
-  <footer class="footer">Desenvolvido por Bruno Ferreira da Cruz</footer>
-
-  <!-- Modal -->
-  <div class="modal-back" id="modal-back">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
-      <div class="modal-h" id="m-title">Confirmar</div>
-      <div class="modal-b" id="m-body">Tem certeza?</div>
-      <div class="modal-f">
-        <button id="m-cancel" class="secondary">Cancelar</button>
-        <button id="m-ok" class="danger">Excluir</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toasts -->
-  <div class="toasts" id="toasts"></div>
-
-  <script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
-  <script>
+<input autocomplete="off" class="field" id="f_colab_search" placeholder="Digite para pesquisar..."/>
+<input id="f_colaborador_id" type="hidden"/>
+</div>
+<div class="combo-list hidden" id="combo-list"></div>
+</label>
+<label>CPF  <input class="field" id="f_cpf" placeholder="—" readonly=""/></label>
+<label>CTPS <input class="field" id="f_ctps" placeholder="—" readonly=""/></label>
+<label>Série<input class="field" id="f_serie" placeholder="—" readonly=""/></label>
+<label>Data da ocorrência <input class="field" id="f_data_ocorrencia" required="" type="date"/></label>
+<label>Data da aplicação  <input class="field" id="f_data_aplicacao" required="" type="date"/></label>
+<label>Tipo de advertência
+          <select class="field" id="f_tipo" required="">
+<option>Verbal</option>
+<option>Escrita</option>
+</select>
+</label>
+<label id="grp_verbal">Subtipo
+          <select class="field" id="f_verbal_sub">
+<option>Falta não justificada</option>
+<option>Atraso</option>
+<option>Não registrou o ponto</option>
+<option>Insubordinação</option>
+<option>Indisciplina</option>
+<option value="Não informado">Não informado</option></select>
+</label>
+<label style="grid-column:1/-1">Anexo (PNG ou PDF)
+          <input accept=".png,.pdf,image/png,application/pdf" class="field" id="f_arquivo" type="file"/>
+</label>
+<label style="grid-column:1/-1">Observação
+          <textarea class="field" id="f_observacao" placeholder="Escreva um breve contexto ou detalhes..." rows="3"></textarea>
+</label>
+<div class="row" style="grid-column:1/-1">
+<button class="primary" type="submit">💾 Salvar</button>
+</div>
+</form>
+<p class="muted" style="margin-top:8px">O formulário guarda rascunho automaticamente ao trocar de aba.</p>
+</section>
+<!-- REGISTROS AGRUPADOS -->
+<section class="card hidden" id="tab-regs">
+<div class="row" style="justify-content:space-between;align-items:center">
+<h2 style="margin:0">Registros de Advertência</h2>
+<input class="field" id="filter" placeholder="Filtrar por colaborador, CPF ou CTPS" style="max-width:420px"/>
+</div>
+<div id="grp-container" style="margin-top:12px"></div>
+<p class="muted" id="empty">Nenhum registro ainda.</p>
+</section>
+</main>
+<footer class="footer">Desenvolvido por Bruno Ferreira da Cruz</footer>
+<!-- Modal -->
+<div class="modal-back" id="modal-back">
+<div aria-labelledby="m-title" aria-modal="true" class="modal" role="dialog">
+<div class="modal-h" id="m-title">Confirmar</div>
+<div class="modal-b" id="m-body">Tem certeza?</div>
+<div class="modal-f">
+<button class="secondary" id="m-cancel">Cancelar</button>
+<button class="danger" id="m-ok">Excluir</button>
+</div>
+</div>
+</div>
+<!-- Toasts -->
+<div class="toasts" id="toasts"></div>
+<script src="https://unpkg.com/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+<script>
     /* === CONFIG === */
     const SUPABASE_URL="https://bgophlququlizkwioveu.supabase.co";
     const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnb3BobHF1cXVsaXprd2lvdmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMjM3NDgsImV4cCI6MjA3MDc5OTc0OH0.eJQkx1FDhjeNkKRsRuP2qSEMLvj_u_S_tRevmATJECc";
@@ -602,8 +594,8 @@
           const tdo=document.createElement('td'); tdo.textContent=formatDateLocal(r?.data_ocorrencia);
           const tda=document.createElement('td'); tda.textContent=formatDateLocal(r?.data_aplicacao);
           const ttt=document.createElement('td');
-          const subt=r?.verbal_motivo||null;
-          ttt.textContent=r?.tipo?((subt&&r.tipo==='Verbal')?`${r.tipo} – ${subt}`:r.tipo):'—';
+          const subt=r?.motivo||null;
+          ttt.textContent=r?.tipo ? (subt ? `${r.tipo} – ${subt}` : r.tipo) : '—';
           const tan=document.createElement('td');
           if(r?.arquivo_path){
             const {data:pub}=supabaseClient.storage.from('adv_docs').getPublicUrl(r.arquivo_path);
@@ -688,12 +680,8 @@
       if(r?.colaborador_id) setColabById(r.colaborador_id,true); else {E.f_search.value=r?.colaborador_nome||''; resolveColab();}
       E.f_oc.value=toInputDateValue(r?.data_ocorrencia)||'';
       E.f_ap.value=toInputDateValue(r?.data_aplicacao)||'';
-      if(r?.tipo==='Verbal'){
-        E.f_tipo.value='Verbal';
-        E.f_verbal_sub.value=r?.verbal_motivo||'Falta não justificada';
-      } else {
-        E.f_tipo.value=r?.tipo||'Escrita';
-      }
+      E.f_tipo.value = (r?.tipo==='Escrita') ? 'Escrita' : 'Verbal';
+      E.f_verbal_sub.value = r?.motivo || 'Falta não justificada';
       E.f_obs.value=r?.observacao||'';
       toggleVerbal(); saveDraftDebounced();
     }
@@ -720,10 +708,7 @@
         data_ocorrencia:toIsoNoonLocal(E.f_oc.value),
         data_aplicacao: toIsoNoonLocal(E.f_ap.value),
         tipo:E.f_tipo.value,
-        verbal_motivo:
-          (E.f_tipo.value === 'Verbal' || E.f_tipo.value === 'Escrita')
-            ? E.f_verbal_sub.value
-            : null,
+        motivo: E.f_verbal_sub.value || 'Falta não justificada',
         observacao:(E.f_obs.value||'').trim()||null
       };
 
@@ -780,4 +765,3 @@
   </script>
 </body>
 </html>
-
