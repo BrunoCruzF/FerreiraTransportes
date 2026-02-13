@@ -633,65 +633,7 @@
       toast('Colaborador adicionado ✅');
     };
 
-    /* === Registros agrupados === */
-    async function loadAdv(){
-      const {data,error}=await supabaseClient.from('adv_registros_view').select('*');
-      if(error){console.error('loadAdv error', error); return;}
-      advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
-      renderGrouped(advCache);
-      try{ gerarDashboard(advCache); }catch(e){ console.error('gerarDashboard error', e); }
-    }
-    function renderGrouped(items){
-      E.grpContainer.innerHTML='';
-      if(!items.length){E.empty.classList.remove('hidden');return;}
-      E.empty.classList.add('hidden');
-      const map=new Map();
-      for(const r of items){
-        const k=r?.colaborador_nome||r?.colaborador||'—';
-        if(!map.has(k)) map.set(k,[]);
-        map.get(k).push(r);
-      }
-      for(const [nome,arr] of map){
-        const grp=document.createElement('div'); grp.className='grp';
-        const head=document.createElement('div'); head.className='grp-h';
-        head.innerHTML=`<div><strong>${esc(nome)}</strong> <small class="muted">• ${esc(arr[0]?.colaborador_cpf||'—')} • CTPS ${esc(arr[0]?.colaborador_ctps||'—')} • Série ${esc(arr[0]?.colaborador_serie||'—')}</small></div><div><span class="pill">${arr.length}</span></div>`;
-        const body=document.createElement('div'); body.className='grp-b';
-        const table=document.createElement('table'); table.style.marginTop='10px';
-        table.innerHTML=`<thead><tr><th>Ocorrência</th><th>Aplicação</th><th>Tipo</th><th>Anexo</th><th>Ações</th></tr></thead>`;
-        const tb=document.createElement('tbody');
-        for(const r of arr){
-          const tr=document.createElement('tr');
-          const tdo=document.createElement('td'); tdo.textContent=formatDateLocal(r?.data_ocorrencia);
-          const tda=document.createElement('td'); tda.textContent=formatDateLocal(r?.data_aplicacao);
-          const ttt=document.createElement('td');
-          const subt=r?.motivo||null;
-          ttt.textContent=r?.tipo ? (subt ? `${r.tipo} – ${subt}` : r.tipo) : '—';
-          const tan=document.createElement('td');
-          if(r?.arquivo_path){
-            const {data:pub}=supabaseClient.storage.from('adv_docs').getPublicUrl(r.arquivo_path);
-            const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent='baixar'; tan.appendChild(a);
-          } else tan.textContent='—';
-          const tac=document.createElement('td'); const wrap=document.createElement('div'); wrap.className='actions-inline';
-          const ed=document.createElement('button'); ed.className='icon'; ed.title='Editar'; ed.textContent='✏️'; ed.onclick=()=>startEdit(r);
-          const ex=document.createElement('button'); ex.className='icon danger'; ex.title='Excluir'; ex.textContent='🗑️'; ex.onclick=()=>delAdvConfirm(r);
-          const obsBtn=document.createElement('button'); obsBtn.className='icon'; obsBtn.title='Ver observação'; obsBtn.textContent='📝';
-          obsBtn.onclick=()=>{const texto=(r?.observacao||'').trim();showInfo('Observação', texto?`<div style="white-space:pre-wrap">${esc(texto)}</div>`:'<p class="muted">Sem observação.</p>');};
-          wrap.append(ed,ex,obsBtn); tac.appendChild(wrap);
-          tr.append(tdo,tda,ttt,tan,tac); tb.appendChild(tr);
-        }
-        table.appendChild(tb); body.appendChild(table); grp.appendChild(head); grp.appendChild(body);
-        head.onclick=()=>grp.classList.toggle('open');
-        E.grpContainer.appendChild(grp);
-      }
-    }
-    E.filter.oninput=()=>{
-      const f=lower(E.filter.value).trim();
-      const filtered=(advCache||[]).filter(x=>
-        lower(x?.colaborador_nome||x?.colaborador).includes(f) ||
-        lower(x?.colaborador_cpf).includes(f) ||
-        lower(x?.colaborador_ctps).includes(f)
-      );
-     
+
     /* === Dashboard (Painel Executivo) === */
     function ymLabel(d){
       const dt = (d instanceof Date) ? d : new Date(d);
@@ -803,8 +745,65 @@
         refEl.textContent=`Base: registros de advertência • Atualizado em ${nowTxt}`;
       }
     }
- renderGrouped(filtered);
-    };
+
+    /* === Registros agrupados === */
+    async function loadAdv(){
+      const {data,error}=await supabaseClient.from('adv_registros_view').select('*');
+      if(error){console.error('loadAdv error', error); return;}
+      advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
+      renderGrouped(advCache);
+      try{ gerarDashboard(advCache); }catch(e){ console.error('gerarDashboard error', e); }
+    }
+    function renderGrouped(items){
+      E.grpContainer.innerHTML='';
+      if(!items.length){E.empty.classList.remove('hidden');return;}
+      E.empty.classList.add('hidden');
+      const map=new Map();
+      for(const r of items){
+        const k=r?.colaborador_nome||r?.colaborador||'—';
+        if(!map.has(k)) map.set(k,[]);
+        map.get(k).push(r);
+      }
+      for(const [nome,arr] of map){
+        const grp=document.createElement('div'); grp.className='grp';
+        const head=document.createElement('div'); head.className='grp-h';
+        head.innerHTML=`<div><strong>${esc(nome)}</strong> <small class="muted">• ${esc(arr[0]?.colaborador_cpf||'—')} • CTPS ${esc(arr[0]?.colaborador_ctps||'—')} • Série ${esc(arr[0]?.colaborador_serie||'—')}</small></div><div><span class="pill">${arr.length}</span></div>`;
+        const body=document.createElement('div'); body.className='grp-b';
+        const table=document.createElement('table'); table.style.marginTop='10px';
+        table.innerHTML=`<thead><tr><th>Ocorrência</th><th>Aplicação</th><th>Tipo</th><th>Anexo</th><th>Ações</th></tr></thead>`;
+        const tb=document.createElement('tbody');
+        for(const r of arr){
+          const tr=document.createElement('tr');
+          const tdo=document.createElement('td'); tdo.textContent=formatDateLocal(r?.data_ocorrencia);
+          const tda=document.createElement('td'); tda.textContent=formatDateLocal(r?.data_aplicacao);
+          const ttt=document.createElement('td');
+          const subt=r?.motivo||null;
+          ttt.textContent=r?.tipo ? (subt ? `${r.tipo} – ${subt}` : r.tipo) : '—';
+          const tan=document.createElement('td');
+          if(r?.arquivo_path){
+            const {data:pub}=supabaseClient.storage.from('adv_docs').getPublicUrl(r.arquivo_path);
+            const a=document.createElement('a'); a.href=pub.publicUrl; a.target='_blank'; a.rel='noopener'; a.textContent='baixar'; tan.appendChild(a);
+          } else tan.textContent='—';
+          const tac=document.createElement('td'); const wrap=document.createElement('div'); wrap.className='actions-inline';
+          const ed=document.createElement('button'); ed.className='icon'; ed.title='Editar'; ed.textContent='✏️'; ed.onclick=()=>startEdit(r);
+          const ex=document.createElement('button'); ex.className='icon danger'; ex.title='Excluir'; ex.textContent='🗑️'; ex.onclick=()=>delAdvConfirm(r);
+          const obsBtn=document.createElement('button'); obsBtn.className='icon'; obsBtn.title='Ver observação'; obsBtn.textContent='📝';
+          obsBtn.onclick=()=>{const texto=(r?.observacao||'').trim();showInfo('Observação', texto?`<div style="white-space:pre-wrap">${esc(texto)}</div>`:'<p class="muted">Sem observação.</p>');};
+          wrap.append(ed,ex,obsBtn); tac.appendChild(wrap);
+          tr.append(tdo,tda,ttt,tan,tac); tb.appendChild(tr);
+        }
+        table.appendChild(tb); body.appendChild(table); grp.appendChild(head); grp.appendChild(body);
+        head.onclick=()=>grp.classList.toggle('open');
+        E.grpContainer.appendChild(grp);
+      }
+    }
+    E.filter.oninput=()=>{
+      const f=lower(E.filter.value).trim();
+      const filtered=(advCache||[]).filter(x=>
+        lower(x?.colaborador_nome||x?.colaborador).includes(f) ||
+        lower(x?.colaborador_cpf).includes(f) ||
+        lower(x?.colaborador_ctps).includes(f)
+      );
 
     async function delAdvConfirm(r){
       const ok=await confirmModal({
