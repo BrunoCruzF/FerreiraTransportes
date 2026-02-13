@@ -797,13 +797,18 @@
         E.grpContainer.appendChild(grp);
       }
     }
-    E.filter.oninput=()=>{
-      const f=lower(E.filter.value).trim();
-      const filtered=(advCache||[]).filter(x=>
-        lower(x?.colaborador_nome||x?.colaborador).includes(f) ||
-        lower(x?.colaborador_cpf).includes(f) ||
-        lower(x?.colaborador_ctps).includes(f)
-      );
+    E.filter.oninput = () => {
+  const f = lower(E.filter.value).trim();
+
+  const filtered = (advCache || []).filter(x =>
+    lower(x?.colaborador_nome || x?.colaborador).includes(f) ||
+    lower(x?.colaborador_cpf || '').includes(f) ||
+    lower(x?.colaborador_ctps || '').includes(f)
+  );
+
+  renderGrouped(filtered);
+  try { gerarDashboard(filtered); } catch(e) { console.error('gerarDashboard error', e); }
+};
 
     async function delAdvConfirm(r){
       const ok=await confirmModal({
@@ -946,3 +951,4 @@
   </script>
 </body>
 </html>
+
