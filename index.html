@@ -286,6 +286,17 @@
 <section class="card hidden" id="tab-regs">
 <div class="row" style="justify-content:space-between;align-items:center">
 <h2 style="margin:0">Registros de Advertência</h2>
+<label>Ordenar por
+  <select class="field" id="adv-sort" style="min-width:260px">
+    <option value="ocorrencia_desc">Data da ocorrência (mais recente)</option>
+    <option value="ocorrencia_asc">Data da ocorrência (mais antiga)</option>
+    <option value="aplicacao_desc">Data da aplicação (mais recente)</option>
+    <option value="aplicacao_asc">Data da aplicação (mais antiga)</option>
+    <option value="colaborador_asc">Colaborador (A-Z)</option>
+    <option value="colaborador_desc">Colaborador (Z-A)</option>
+    <option value="quantidade_desc">Quantidade de advertências</option>
+  </select>
+</label>
 <input class="field" id="filter" placeholder="Filtrar por colaborador, CPF ou CTPS" style="max-width:420px"/>
 </div>
 <div id="grp-container" style="margin-top:12px"></div>
@@ -444,7 +455,7 @@
     E.f_verbal_grp=$('#grp_verbal'); E.f_verbal_sub=$('#f_verbal_sub'); E.f_file=$('#f_arquivo');
     E.f_obs=$('#f_observacao');
     E.btnNew=$('#btn-new-adv'); E.btnClear=$('#btn-clear-adv');
-    E.filter=$('#filter'); E.grpContainer=$('#grp-container'); E.empty=$('#empty');
+    E.filter=$('#filter'); E.sortAdv=$('#adv-sort'); E.grpContainer=$('#grp-container'); E.empty=$('#empty');
 
     /* === Tabs === */
     function setTab(n){
@@ -750,21 +761,102 @@
     async function loadAdv(){
       const {data,error}=await supabaseClient.from('adv_registros_view').select('*');
       if(error){console.error('loadAdv error', error); return;}
-      advCache=(data||[]).slice().sort((a,b)=>( (a?.colaborador_nome||'').localeCompare(b?.colaborador_nome||'') ));
-      renderGrouped(advCache);
+      advCache=(data||[]).slice();
+      applyOrdenacao();
       try{ gerarDashboard(advCache); }catch(e){ console.error('gerarDashboard error', e); }
     }
-    function renderGrouped(items){
-      E.grpContainer.innerHTML='';
-      if(!items.length){E.empty.classList.remove('hidden');return;}
-      E.empty.classList.add('hidden');
-      const map=new Map();
-      for(const r of items){
-        const k=r?.colaborador_nome||r?.colaborador||'—';
-        if(!map.has(k)) map.set(k,[]);
-        map.get(k).push(r);
+
+    function nomeColaborador(r){
+      return r?.colaborador_nome||r?.colaborador||'—';
+    }
+
+    function compararNomes(a,b){
+      return nomeColaborador(a).localeCompare(nomeColaborador(b),'pt-BR',{sensitivity:'base',numeric:true});
+    }
+
+    function timestampData(valor){
+      if(!valor) return null;
+      const timestamp=new Date(valor).getTime();
+      return Number.isNaN(timestamp)?null:timestamp;
+    }
+
+    function compararDatas(a,b,campo,direcao='desc'){
+      const dataA=timestampData(a?.[campo]);
+      const dataB=timestampData(b?.[campo]);
+      if(dataA===null && dataB===null) return 0;
+      if(dataA===null) return 1;
+      if(dataB===null) return -1;
+      return direcao==='asc'?dataA-dataB:dataB-dataA;
+    }
+
+    function sortAdvertencias(items,campo='data_ocorrencia',direcao='desc'){
+      return (items||[]).slice().sort((a,b)=>
+        compararDatas(a,b,campo,direcao) ||
+        compararDatas(a,b,'data_ocorrencia','desc') ||
+        compararNomes(a,b)
+      );
+    }
+
+    function sortInternoGrupo(items,ordenacao){
+      const opcoesData={
+        ocorrencia_desc:['data_ocorrencia','desc'],
+        ocorrencia_asc:['data_ocorrencia','asc'],
+        aplicacao_desc:['data_aplicacao','desc'],
+        aplicacao_asc:['data_aplicacao','asc']
+      };
+      const [campo,direcao]=opcoesData[ordenacao]||['data_ocorrencia','desc'];
+      return sortAdvertencias(items,campo,direcao);
+    }
+
+    function sortGroupedAdvertencias(items,ordenacao){
+      const grupos=new Map();
+      for(const r of items||[]){
+        const nome=nomeColaborador(r);
+        if(!grupos.has(nome)) grupos.set(nome,[]);
+        grupos.get(nome).push(r);
       }
-      for(const [nome,arr] of map){
+
+      const agrupados=Array.from(grupos,([nome,registros])=>({
+        nome,
+        registros:sortInternoGrupo(registros,ordenacao)
+      }));
+
+      return agrupados.sort((a,b)=>{
+        if(ordenacao==='quantidade_desc'){
+          return b.registros.length-a.registros.length || compararNomes(a.registros[0],b.registros[0]);
+        }
+        if(ordenacao==='colaborador_desc') return compararNomes(b.registros[0],a.registros[0]);
+        if(ordenacao==='colaborador_asc') return compararNomes(a.registros[0],b.registros[0]);
+
+        const porData=compararDatas(a.registros[0],b.registros[0],
+          ordenacao?.startsWith('aplicacao')?'data_aplicacao':'data_ocorrencia',
+          ordenacao?.endsWith('_asc')?'asc':'desc'
+        );
+        return porData || compararNomes(a.registros[0],b.registros[0]);
+      });
+    }
+
+    function filtrarAdvertencias(){
+      const filtro=lower(E.filter.value).trim();
+      return (advCache||[]).filter(x=>
+        lower(x?.colaborador_nome||x?.colaborador).includes(filtro) ||
+        lower(x?.colaborador_cpf||'').includes(filtro) ||
+        lower(x?.colaborador_ctps||'').includes(filtro)
+      );
+    }
+
+    function applyOrdenacao(){
+      const filtrados=filtrarAdvertencias();
+      const agrupados=sortGroupedAdvertencias(filtrados,E.sortAdv.value||'ocorrencia_desc');
+      renderOrdenado(agrupados);
+      return filtrados;
+    }
+
+    function renderOrdenado(grupos){
+      E.grpContainer.innerHTML='';
+      if(!grupos.length){E.empty.classList.remove('hidden');return;}
+      E.empty.classList.add('hidden');
+      for(const {nome,registros:arr} of grupos){
         const grp=document.createElement('div'); grp.className='grp';
         const head=document.createElement('div'); head.className='grp-h';
         head.innerHTML=`<div><strong>${esc(nome)}</strong> <small class="muted">• ${esc(arr[0]?.colaborador_cpf||'—')} • CTPS ${esc(arr[0]?.colaborador_ctps||'—')} • Série ${esc(arr[0]?.colaborador_serie||'—')}</small></div><div><span class="pill">${arr.length}</span></div>`;
@@ -797,18 +889,16 @@
         E.grpContainer.appendChild(grp);
       }
     }
+
+    function renderGrouped(items){
+      renderOrdenado(sortGroupedAdvertencias(items,E.sortAdv.value||'ocorrencia_desc'));
+    }
+
+    E.sortAdv.onchange=()=>applyOrdenacao();
     E.filter.oninput = () => {
-  const f = lower(E.filter.value).trim();
-
-  const filtered = (advCache || []).filter(x =>
-    lower(x?.colaborador_nome || x?.colaborador).includes(f) ||
-    lower(x?.colaborador_cpf || '').includes(f) ||
-    lower(x?.colaborador_ctps || '').includes(f)
-  );
-
-  renderGrouped(filtered);
-  try { gerarDashboard(filtered); } catch(e) { console.error('gerarDashboard error', e); }
-};
+      const filtered=applyOrdenacao();
+      try { gerarDashboard(filtered); } catch(e) { console.error('gerarDashboard error', e); }
+    };
 
     async function delAdvConfirm(r){
       const ok=await confirmModal({
